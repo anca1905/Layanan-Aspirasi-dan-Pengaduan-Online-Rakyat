@@ -1,0 +1,251 @@
+/* * Tema Resmi Pemerintah Kabupaten Bombana 
+ * Warna Utama: Merah Marun (Maroon) & Emas (Gold)
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --primary-color: #8B0000;
+    /* Merah Marun khas Pemkab */
+    --secondary-color: #DAA520;
+    /* Aksen Emas / Kuning */
+    --text-dark: #2c3e50;
+    --text-light: #ffffff;
+    --bg-light: #f8f9fa;
+    --border-color: #e9ecef;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* --- NAVBAR (HEADER) --- */
+.navbar {
+    background-color: var(--primary-color) !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-bottom: 4px solid var(--secondary-color);
+    padding: 15px 0;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: var(--text-light) !important;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.navbar-brand img {
+    height: 50px;
+    /* Sesuaikan ukuran logo Bombana */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    padding: 8px 15px !important;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: var(--secondary-color) !important;
+}
+
+/* --- HERO SECTION (BERANDA) --- */
+.hero-section {
+    /* Menggunakan gambar hero dengan overlay gelap agar teks mudah dibaca */
+    background: linear-gradient(rgba(139, 0, 0, 0.85), rgba(30, 30, 30, 0.85)), url('../img/bg_hero.png') no-repeat center center;
+    background-size: cover;
+    color: var(--text-light);
+    padding: 120px 20px;
+    text-align: center;
+    border-bottom: 5px solid var(--secondary-color);
+}
+
+.hero-section h1 {
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    margin-bottom: 20px;
+}
+
+.hero-section p {
+    font-size: 1.2rem;
+    font-weight: 400;
+    max-width: 800px;
+    margin: 0 auto 30px auto;
+    color: #e0e0e0;
+}
+
+/* --- BUTTONS (TOMBOL) --- */
+.btn {
+    border-radius: 4px;
+    /* Kotak tegas khas website resmi */
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px 25px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #660000;
+    border-color: #660000;
+    box-shadow: 0 4px 10px rgba(139, 0, 0, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-warning {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    color: #fff;
+}
+
+.btn-warning:hover {
+    background-color: #b8860b;
+    border-color: #b8860b;
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(218, 165, 32, 0.3);
+    transform: translateY(-2px);
+}
+
+/* --- KOTAK KONTEN (CARD) --- */
+.card-container-overlap {
+    position: relative;
+    z-index: 10;
+    margin-top: -50px;
+}
+.card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    border-top: 4px solid var(--primary-color);
+    margin-bottom: 30px;
+    background-color: #fff;
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 2px solid var(--border-color);
+    font-weight: 700;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    padding: 20px;
+    font-size: 1.1rem;
+}
+
+.card-body {
+    padding: 30px;
+}
+
+/* --- FORM & INPUT --- */
+.form-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.form-control,
+.form-select {
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    padding: 12px 15px;
+    background-color: #fcfcfc;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 0.25rem rgba(218, 165, 32, 0.25);
+    background-color: #fff;
+}
+
+/* --- FOOTER --- */
+footer {
+    background-color: #212529;
+    color: #adb5bd;
+    padding: 40px 0 20px 0;
+    text-align: center;
+    border-top: 5px solid var(--secondary-color);
+    margin-top: 60px;
+}
+
+footer h5 {
+    color: var(--text-light);
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+footer hr {
+    border-color: #495057;
+    margin: 20px 0;
+}
+
+footer p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+footer .text-gold {
+    color: var(--secondary-color);
+}
+
+/* --- RESPONSIVE MOBILE --- */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 60px 15px 80px 15px;
+    }
+    
+    .hero-section h1 {
+        font-size: 1.8rem;
+    }
+    
+    .hero-section p {
+        font-size: 1rem;
+        margin-bottom: 20px;
+    }
+    
+    .navbar-brand {
+        font-size: 1rem;
+    }
+    
+    .navbar-brand img {
+        height: 40px;
+    }
+    
+    .nav-link {
+        padding: 10px 0 !important;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    /* Make buttons in navbar stretch on mobile */
+    .navbar-nav .btn {
+        width: 100%;
+        margin-top: 10px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+    
+    .card-container-overlap {
+        margin-top: -20px;
+    }
+}
