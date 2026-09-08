@@ -16,6 +16,10 @@ try {
         $pdo->exec("ALTER TABLE users DROP COLUMN nik");
     }
 
+    if (columnExists($pdo, 'reports', 'reporter_nik')) {
+        $pdo->exec("ALTER TABLE reports DROP COLUMN reporter_nik");
+    }
+
     if (!columnExists($pdo, 'users', 'reset_token')) {
         $pdo->exec("ALTER TABLE users ADD COLUMN reset_token VARCHAR(255) NULL");
     }

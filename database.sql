@@ -16,7 +16,6 @@ CREATE TABLE IF NOT EXISTS reports (
     id INT AUTO_INCREMENT PRIMARY KEY,
     tracking_code VARCHAR(20) NOT NULL UNIQUE,
     user_id INT DEFAULT NULL,
-    reporter_nik VARCHAR(16) NOT NULL,
     reporter_name VARCHAR(100) NOT NULL,
     location TEXT NOT NULL,
     kecamatan VARCHAR(100) NOT NULL,

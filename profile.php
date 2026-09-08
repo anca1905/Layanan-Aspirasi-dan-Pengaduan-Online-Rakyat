@@ -103,7 +103,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         </div>
                         <div>
                             <h5 class="fw-bold mb-1"><?php echo htmlspecialchars($user['name']); ?></h5>
-                            <p class="text-muted mb-1 small"><i class="fas fa-id-card me-1"></i> NIK: <strong><?php echo htmlspecialchars($user['nik'] ?? '-'); ?></strong></p>
                             <p class="text-muted mb-1 small"><i class="fas fa-user-circle me-1"></i> Username: <strong><?php echo htmlspecialchars($user['username']); ?></strong></p>
                             <span class="badge" style="background-color: var(--primary-color);">Pelapor</span>
                         </div>
@@ -114,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="card shadow-lg border-0" style="border-top: 5px solid var(--primary-color) !important;">
                     <div class="card-header bg-white pt-4 pb-0 border-0 text-center">
                         <h4 class="fw-bold" style="color: var(--primary-color);"><i class="fas fa-user-edit me-2"></i>Edit Profil</h4>
-                        <p class="text-muted small">NIK dan Username Anda tidak dapat diubah</p>
+                        <p class="text-muted small">Username Anda tidak dapat diubah</p>
                     </div>
                     <div class="card-body p-4 p-md-5">
 
@@ -126,15 +125,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <?php endif; ?>
 
                         <form action="" method="POST">
-                            <!-- NIK (readonly) -->
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">NIK (No. KTP) <span class="text-muted small fw-normal">— tidak dapat diubah</span></label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light"><i class="fas fa-id-card text-muted"></i></span>
-                                    <input type="text" class="form-control bg-light text-muted" value="<?php echo htmlspecialchars($user['nik'] ?? ''); ?>" readonly>
-                                </div>
-                            </div>
-
                             <!-- Username (readonly) -->
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Username <span class="text-muted small fw-normal">— tidak dapat diubah</span></label>

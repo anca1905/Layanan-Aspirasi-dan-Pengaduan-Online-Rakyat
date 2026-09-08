@@ -71,7 +71,7 @@ require_once 'layouts/sidebar.php';
                                         <input type="text" name="name" class="form-control" required>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Username / NIK</label>
+                                        <label class="form-label fw-bold">Username</label>
                                         <input type="text" name="username" class="form-control" required>
                                     </div>
                                     <div class="mb-3">
@@ -104,7 +104,7 @@ require_once 'layouts/sidebar.php';
                                             <tr>
                                                 <th class="ps-4">No</th>
                                                 <th>Nama Lengkap</th>
-                                                <th>Username / NIK</th>
+                                                <th>Username</th>
                                                 <th>Role</th>
                                                 <th>Terdaftar</th>
                                                 <th class="text-center">Aksi</th>
@@ -117,7 +117,6 @@ require_once 'layouts/sidebar.php';
                                                     <td class="fw-bold"><?php echo htmlspecialchars($u['name']); ?></td>
                                                     <td>
                                                         <?php echo htmlspecialchars($u['username']); ?>
-                                                        <?php if(!empty($u['nik'])) echo '<br><small class="text-muted">NIK: ' . htmlspecialchars($u['nik']) . '</small>'; ?>
                                                     </td>
                                                     <td>
                                                         <?php 

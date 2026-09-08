@@ -13,7 +13,6 @@ $tracking_code = '';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Sesuaikan dengan nama kolom di database ana.sql
     $user_id = $_SESSION['user_id'];
-    $nik = $_SESSION['nik'] ?? $_SESSION['username'];
     $nama = $_SESSION['name'];
     $lokasi = $_POST['location'] ?? '';
     $kecamatan = $_POST['kecamatan'] ?? '';
@@ -56,8 +55,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     try {
         // Query disesuaikan persis dengan struktur ana.sql
-        $stmt = $pdo->prepare("INSERT INTO reports (tracking_code, user_id, reporter_nik, reporter_name, location, kecamatan, desa, severity, latitude, longitude, photo, description, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Diproses')");
-        $stmt->execute([$tracking_code, $user_id, $nik, $nama, $lokasi, $kecamatan, $desa, $severity, $lat, $lng, $foto, $deskripsi]);
+        $stmt = $pdo->prepare("INSERT INTO reports (tracking_code, user_id, reporter_name, location, kecamatan, desa, severity, latitude, longitude, photo, description, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Diproses')");
+        $stmt->execute([$tracking_code, $user_id, $nama, $lokasi, $kecamatan, $desa, $severity, $lat, $lng, $foto, $deskripsi]);
 
         $message = "<div class='alert alert-success shadow-sm border-0 border-start border-5 border-success rounded-end'>
                         <h5 class='alert-heading fw-bold'><i class='fas fa-check-circle me-2'></i>Laporan Berhasil Terkirim!</h5>
@@ -131,10 +130,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <p class="text-muted">Lengkapi data di bawah ini. Titik lokasi Anda akan dideteksi secara otomatis.</p>
                         </div>
                         <div class="card-body p-4 p-md-5">
-                            <!-- Info pelapor: NIK & Nama diambil dari profil, tidak ditampilkan di sini -->
+                            <!-- Info pelapor: Nama diambil dari profil -->
                             <div class="alert alert-info py-2 small mb-3 d-flex align-items-center gap-2">
                                 <i class="fas fa-user-circle fa-lg"></i>
-                                <div>Laporan ini akan dikirim atas nama <strong><?php echo htmlspecialchars($_SESSION['name']); ?></strong> (NIK: <?php echo htmlspecialchars($_SESSION['nik'] ?? '-'); ?>). <a href="profile.php" class="fw-bold">Edit Profil</a></div>
+                                <div>Laporan ini akan dikirim atas nama <strong><?php echo htmlspecialchars($_SESSION['name']); ?></strong>. <a href="profile.php" class="fw-bold">Edit Profil</a></div>
                             </div>
 
                             <form action="" method="POST" enctype="multipart/form-data">
@@ -317,6 +316,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
+
+                        // Tambahkan Watermark Koordinat dan Waktu
+                        let currentLat = document.getElementById('lat').value || 'Belum dideteksi';
+                        let currentLng = document.getElementById('lng').value || 'Belum dideteksi';
+                        
+                        // Atur font responsif sesuai ukuran gambar
+                        let fontSize = Math.max(14, Math.floor(width * 0.025)); 
+                        let padding = fontSize * 0.5;
+                        let bgHeight = (fontSize * 2.5) + (padding * 2);
+                        
+                        ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; 
+                        ctx.fillRect(0, height - bgHeight, width, bgHeight);
+
+                        ctx.font = fontSize + "px Arial";
+                        ctx.fillStyle = "white";
+                        
+                        let dateObj = new Date();
+                        let dateStr = dateObj.toLocaleString('id-ID');
+                        
+                        ctx.fillText(`Waktu: ${dateStr}`, padding, height - bgHeight + fontSize + padding);
+                        ctx.fillText(`Koordinat: ${currentLat}, ${currentLng}`, padding, height - padding - (fontSize * 0.2));
 
                         // Konversi ke Blob (JPEG, quality 0.7)
                         canvas.toBlob(blob => {

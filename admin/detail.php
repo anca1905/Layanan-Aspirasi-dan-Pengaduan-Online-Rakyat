@@ -211,7 +211,7 @@ require_once 'layouts/sidebar.php';
                             <div class="mb-4">
                                 <label class="form-label fw-bold">Ubah Status Laporan</label>
                                 <select name="status" class="form-select form-select-lg shadow-sm" required>
-                                    <option value="Diproses" <?php echo ($report['status'] == 'Diproses') ? 'selected' : ''; ?>>🟡 Pending (Sedang Diproses)</option>
+                                    <option value="Diproses" <?php echo ($report['status'] == 'Diproses') ? 'selected' : ''; ?>>🟡 Sedang Diproses</option>
                                     <option value="Disetujui" <?php echo ($report['status'] == 'Disetujui') ? 'selected' : ''; ?>>🟢 Disetujui</option>
                                     <option value="Ditolak" <?php echo ($report['status'] == 'Ditolak') ? 'selected' : ''; ?>>🔴 Ditolak (Laporan Tidak Valid)</option>
                                 </select>

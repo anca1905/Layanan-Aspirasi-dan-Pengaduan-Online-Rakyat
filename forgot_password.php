@@ -4,7 +4,6 @@ require_once 'config/database.php';
 
 $error = '';
 $success = '';
-$simulated_link = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = trim($_POST['email'] ?? '');
@@ -17,23 +16,57 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         if ($stmt->rowCount() > 0) {
             $token = bin2hex(random_bytes(32));
-            $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
-            
-            $update = $pdo->prepare("UPDATE users SET reset_token = ?, reset_expires = ? WHERE email = ?");
-            $update->execute([$token, $expires, $email]);
+            $update = $pdo->prepare("UPDATE users SET reset_token = ?, reset_expires = DATE_ADD(NOW(), INTERVAL 1 HOUR) WHERE email = ?");
+            $update->execute([$token, $email]);
             
             $success = "Instruksi reset password telah diproses.";
             
-            // Simulasi pengiriman email untuk environment lokal (Laragon)
+            // Pengiriman email dengan PHPMailer
             $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
             $host = $_SERVER['HTTP_HOST'];
-            $path = dirname($_SERVER['PHP_SELF']);
+            $path = rtrim(str_replace('\\', '/', dirname($_SERVER['PHP_SELF'])), '/');
             $reset_link = "$protocol://$host$path/reset_password.php?token=$token";
             
-            $simulated_link = "<div class='alert alert-info mt-3 small'><b>[SIMULASI EMAIL]</b><br>Dalam sistem riil, link ini akan dikirim via email.<br>Link Reset: <a href='$reset_link' class='alert-link'>$reset_link</a></div>";
+            require 'vendor/autoload.php';
+            $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+
+            try {
+                // Konfigurasi SMTP
+                $mail->isSMTP();
+                $mail->Host       = 'smtp.gmail.com'; // Ganti dengan SMTP Anda
+                $mail->SMTPAuth   = true;
+                $mail->Username   = 'arsyadhijrah49720@gmail.com'; // Ganti dengan Email Anda
+                $mail->Password   = 'kxzq hgzn fewa nruj'; // Ganti dengan App Password Email Anda
+                $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+                $mail->Port       = 587;
+
+                // Pengirim & Penerima
+                $mail->setFrom('noreply@bombanakab.go.id', 'Sistem Pengaduan Bombana');
+                $mail->addAddress($email);
+
+                // Konten Email
+                $mail->isHTML(true);
+                $mail->Subject = 'Reset Password - Sistem Pengaduan Bombana';
+                $mail->Body    = "
+                    <h3>Halo,</h3>
+                    <p>Kami menerima permintaan untuk mereset password akun Anda di Sistem Pengaduan Jalan Kabupaten Bombana.</p>
+                    <p>Silakan klik link di bawah ini untuk mengatur ulang password Anda:</p>
+                    <p><a href='{$reset_link}' style='padding: 10px 15px; background-color: #8B0000; color: white; text-decoration: none; border-radius: 5px;'>Reset Password Sekarang</a></p>
+                    <p>Link ini akan kadaluarsa dalam 1 jam.</p>
+                    <p>Jika Anda tidak pernah meminta reset password, abaikan email ini.</p>
+                    <br>
+                    <p>Terima kasih,<br>Tim IT Pemkab Bombana</p>
+                ";
+                $mail->AltBody = "Halo,\n\nKami menerima permintaan untuk mereset password akun Anda.\n\nSilakan klik link berikut untuk mereset password Anda:\n{$reset_link}\n\nJika Anda tidak meminta reset password, abaikan pesan ini.\n\nTerima kasih,\nTim IT Pemkab Bombana";
+
+                $mail->send();
+                $success = "Instruksi reset password telah dikirim ke email Anda. Silakan cek Inbox atau folder Spam.";
+            } catch (Exception $e) {
+                $error = "Pesan gagal dikirim. Mailer Error: {$mail->ErrorInfo}";
+            }
         } else {
             // Untuk keamanan, tetap tampilkan pesan sukses agar tidak bisa menebak email yang terdaftar
-            $success = "Instruksi reset password telah diproses.";
+            $success = "Instruksi reset password telah dikirim ke email Anda. Silakan cek Inbox atau folder Spam.";
         }
     }
 }
@@ -82,8 +115,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <button type="submit" class="btn btn-primary fw-bold py-2"><i class="fas fa-paper-plane me-2"></i> KIRIM LINK RESET</button>
                             </div>
                         </form>
-                        
-                        <?php echo $simulated_link; ?>
 
                         <hr class="text-muted">
                         <div class="text-center mt-3">
