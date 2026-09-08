@@ -6,14 +6,14 @@ require_once 'config/database.php';
 $error = '';
 $success_msg = '';
 if (isset($_GET['registered']) && $_GET['registered'] == '1') {
-    $success_msg = "Registrasi berhasil! Silakan masuk dengan Username atau NIK dan password Anda.";
+    $success_msg = "Registrasi berhasil! Silakan masuk dengan Username atau Email dan password Anda.";
 }
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
     try {
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? OR nik = ?");
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? OR email = ?");
         $stmt->execute([$username, $username]);
         if ($stmt->rowCount() > 0) {
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['name'] = $user['name'];
-                $_SESSION['nik'] = $user['nik'];
+                $_SESSION['email'] = $user['email'];
                 $_SESSION['role'] = $user['role'];
                 
                 if ($user['role'] === 'admin') {
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $error = "Password yang Anda masukkan salah!";
             }
         } else {
-            $error = "Username atau NIK tidak terdaftar!";
+            $error = "Username atau Email tidak terdaftar!";
         }
     } catch (PDOException $e) {
         $error = "System Error: " . $e->getMessage();
@@ -107,10 +107,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                         <form action="" method="POST">
                             <div class="mb-3">
-                                <label class="form-label text-muted fw-bold small">Username atau NIK</label>
+                                <label class="form-label text-muted fw-bold small">Username atau Email</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light"><i class="fas fa-user text-muted"></i></span>
-                                    <input type="text" name="username" class="form-control bg-light" placeholder="Masukkan Username atau NIK Anda..." required>
+                                    <input type="text" name="username" class="form-control bg-light" placeholder="Masukkan Username atau Email Anda..." required>
                                 </div>
                             </div>
                             <div class="mb-4">
@@ -118,6 +118,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <div class="input-group">
                                     <span class="input-group-text bg-light"><i class="fas fa-lock text-muted"></i></span>
                                     <input type="password" name="password" class="form-control bg-light" placeholder="Masukkan password..." required>
+                                </div>
+                                <div class="text-end mt-2">
+                                    <a href="forgot_password.php" class="small text-decoration-none" style="color: var(--primary-color);">Lupa Password?</a>
                                 </div>
                             </div>
 

@@ -146,7 +146,7 @@ require_once 'layouts/sidebar.php';
                                                         <td>
                                                             <?php
                                                             $s = strtolower($row['status'] ?? '');
-                                                            if ($s == 'menunggu') echo '<span class="badge bg-warning text-dark">Menunggu</span>';
+                                                            if ($s == 'diproses') echo '<span class="badge bg-warning text-dark">Diproses</span>';
                                                             elseif ($s == 'disetujui') echo '<span class="badge bg-success">Disetujui</span>';
                                                             else echo '<span class="badge bg-danger">Ditolak</span>';
                                                             ?>

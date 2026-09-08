@@ -203,12 +203,12 @@ if (!empty($_GET['cari']))   $filter_label .= ' | Pencarian: ' . htmlspecialchar
     <?php
     $total    = count($reports);
     $disetujui= count(array_filter($reports, fn($r) => strtolower($r['status']) === 'disetujui'));
-    $menunggu = count(array_filter($reports, fn($r) => strtolower($r['status']) === 'menunggu'));
+    $menunggu = count(array_filter($reports, fn($r) => strtolower($r['status']) === 'diproses'));
     $ditolak  = count(array_filter($reports, fn($r) => strtolower($r['status']) === 'ditolak'));
     ?>
     <div class="summary-box">
         <div class="summary-item"><strong><?php echo $total; ?></strong>Total</div>
-        <div class="summary-item"><strong><?php echo $menunggu; ?></strong>Menunggu</div>
+        <div class="summary-item"><strong><?php echo $menunggu; ?></strong>Diproses</div>
         <div class="summary-item"><strong><?php echo $disetujui; ?></strong>Disetujui</div>
         <div class="summary-item"><strong><?php echo $ditolak; ?></strong>Ditolak</div>
     </div>

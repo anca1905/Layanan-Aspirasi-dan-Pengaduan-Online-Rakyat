@@ -5,8 +5,14 @@
                 <small style="color: var(--secondary-color);">Pemkab Bombana</small>
             </div>
             <div class="nav-menu mt-3">
+                <?php
+                // Hitung laporan yang belum dibaca
+                $stmt_unread = $pdo->query("SELECT COUNT(*) FROM reports WHERE is_read = 0");
+                $unread_count = $stmt_unread->fetchColumn();
+                $unread_badge = $unread_count > 0 ? " <span class='badge bg-danger ms-2'>$unread_count Baru</span>" : "";
+                ?>
                 <a href="index.php" class="<?php echo (isset($active_menu) && $active_menu == 'dashboard') ? 'active' : ''; ?>"><i class="fas fa-home me-2"></i> Dashboard</a>
-                <a href="reports.php" class="<?php echo (isset($active_menu) && $active_menu == 'reports') ? 'active' : ''; ?>"><i class="fas fa-file-alt me-2"></i> Data Laporan</a>
+                <a href="reports.php" class="<?php echo (isset($active_menu) && $active_menu == 'reports') ? 'active' : ''; ?>"><i class="fas fa-file-alt me-2"></i> Data Laporan <?php echo $unread_badge; ?></a>
                 <a href="map.php" class="<?php echo (isset($active_menu) && $active_menu == 'map') ? 'active' : ''; ?>"><i class="fas fa-map-marked-alt me-2"></i> Peta Sebaran</a>
                 <a href="users.php" class="<?php echo (isset($active_menu) && $active_menu == 'users') ? 'active' : ''; ?>"><i class="fas fa-users me-2"></i> Kelola Pengguna</a>
                 <a href="settings.php" class="<?php echo (isset($active_menu) && $active_menu == 'settings') ? 'active' : ''; ?>"><i class="fas fa-cog me-2"></i> Pengaturan</a>

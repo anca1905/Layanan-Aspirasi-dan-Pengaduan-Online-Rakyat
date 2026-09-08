@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     try {
         // Query disesuaikan persis dengan struktur ana.sql
-        $stmt = $pdo->prepare("INSERT INTO reports (tracking_code, user_id, reporter_nik, reporter_name, location, kecamatan, desa, severity, latitude, longitude, photo, description, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Menunggu')");
+        $stmt = $pdo->prepare("INSERT INTO reports (tracking_code, user_id, reporter_nik, reporter_name, location, kecamatan, desa, severity, latitude, longitude, photo, description, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Diproses')");
         $stmt->execute([$tracking_code, $user_id, $nik, $nama, $lokasi, $kecamatan, $desa, $severity, $lat, $lng, $foto, $deskripsi]);
 
         $message = "<div class='alert alert-success shadow-sm border-0 border-start border-5 border-success rounded-end'>

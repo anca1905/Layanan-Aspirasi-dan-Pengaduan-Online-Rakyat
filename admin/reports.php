@@ -62,7 +62,7 @@ require_once 'layouts/sidebar.php';
                             <div class="col-md-3">
                                 <select name="status" class="form-select">
                                     <option value="">-- Semua Status --</option>
-                                    <option value="Menunggu" <?php echo (isset($_GET['status']) && $_GET['status'] == 'Menunggu') ? 'selected' : ''; ?>>Menunggu</option>
+                                    <option value="Diproses" <?php echo (isset($_GET['status']) && $_GET['status'] == 'Diproses') ? 'selected' : ''; ?>>Diproses</option>
                                     <option value="Disetujui" <?php echo (isset($_GET['status']) && $_GET['status'] == 'Disetujui') ? 'selected' : ''; ?>>Disetujui</option>
                                     <option value="Ditolak" <?php echo (isset($_GET['status']) && $_GET['status'] == 'Ditolak') ? 'selected' : ''; ?>>Ditolak</option>
                                 </select>
@@ -114,7 +114,7 @@ require_once 'layouts/sidebar.php';
                                                 <td>
                                                     <?php
                                                     $s = strtolower($row['status'] ?? '');
-                                                    if ($s == 'menunggu') echo '<span class="badge bg-warning text-dark border"><i class="fas fa-clock"></i> Menunggu</span>';
+                                                    if ($s == 'diproses') echo '<span class="badge bg-warning text-dark border"><i class="fas fa-clock"></i> Diproses</span>';
                                                     elseif ($s == 'disetujui') echo '<span class="badge bg-success"><i class="fas fa-check"></i> Disetujui</span>';
                                                     else echo '<span class="badge bg-danger"><i class="fas fa-times"></i> Ditolak</span>';
                                                     ?>

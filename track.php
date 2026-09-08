@@ -16,6 +16,32 @@ if (isset($_GET['tracking_id']) && !empty(trim($_GET['tracking_id']))) {
 
         if (!$report_detail) {
             $error = "Data laporan tidak ditemukan.";
+        } else {
+            // Tangani submit komentar
+            if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_comment'])) {
+                if (isset($_SESSION['user_id'])) {
+                    $comment_text = trim($_POST['comment']);
+                    if (!empty($comment_text)) {
+                        $stmt_ins = $pdo->prepare("INSERT INTO comments (report_id, user_id, comment) VALUES (?, ?, ?)");
+                        $stmt_ins->execute([$report_detail['id'], $_SESSION['user_id'], $comment_text]);
+                        header("Location: track.php?tracking_id=" . urlencode($tracking_id) . "&msg=success");
+                        exit;
+                    }
+                } else {
+                    $error = "Anda harus login untuk memberikan komentar.";
+                }
+            }
+
+            // Ambil komentar
+            $stmt_comments = $pdo->prepare("
+                SELECT c.*, u.name, u.role 
+                FROM comments c 
+                JOIN users u ON c.user_id = u.id 
+                WHERE c.report_id = ? 
+                ORDER BY c.created_at ASC
+            ");
+            $stmt_comments->execute([$report_detail['id']]);
+            $comments = $stmt_comments->fetchAll(PDO::FETCH_ASSOC);
         }
     } catch (PDOException $e) {
         $error = "Terjadi kesalahan sistem: " . $e->getMessage();
@@ -38,8 +64,8 @@ if (isset($_GET['tracking_id']) && !empty(trim($_GET['tracking_id']))) {
 
 function getStatusBadge($status) {
     $status = strtolower($status);
-    if ($status == 'menunggu') {
-        return '<span class="status-badge status-pending"><i class="fas fa-clock me-1"></i> Menunggu</span>';
+    if ($status == 'diproses') {
+        return '<span class="status-badge status-pending"><i class="fas fa-clock me-1"></i> Diproses</span>';
     } elseif ($status == 'disetujui') {
         return '<span class="status-badge status-selesai"><i class="fas fa-check-circle me-1"></i> Disetujui</span>';
     } elseif ($status == 'ditolak') {
@@ -218,6 +244,62 @@ function getStatusBadge($status) {
                                     <p class="mb-0 mt-3" style="white-space: pre-line;"><?php echo htmlspecialchars($report_detail['tanggapan']); ?></p>
                                 </div>
                             <?php endif; ?>
+
+                            <!-- KOMENTAR SECTION -->
+                            <div class="mt-5 pt-4 border-top">
+                                <h5 class="fw-bold mb-4"><i class="fas fa-comments me-2 text-primary"></i> Kolom Diskusi</h5>
+                                
+                                <?php if (isset($_GET['msg']) && $_GET['msg'] == 'success'): ?>
+                                    <div class="alert alert-success py-2 small">Komentar berhasil ditambahkan.</div>
+                                <?php endif; ?>
+
+                                <!-- List Komentar -->
+                                <div class="mb-4">
+                                    <?php if (!empty($comments)): ?>
+                                        <?php foreach ($comments as $c): ?>
+                                            <div class="d-flex mb-3">
+                                                <div class="flex-shrink-0">
+                                                    <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-weight: bold;">
+                                                        <?php echo strtoupper(substr($c['name'], 0, 1)); ?>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-grow-1 ms-3">
+                                                    <div class="bg-light p-3 rounded shadow-sm">
+                                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                                            <h6 class="fw-bold mb-0">
+                                                                <?php echo htmlspecialchars($c['name']); ?>
+                                                                <?php if ($c['role'] == 'admin' || $c['role'] == 'kabid'): ?>
+                                                                    <span class="badge bg-danger ms-1" style="font-size: 0.65em;">Admin</span>
+                                                                <?php endif; ?>
+                                                            </h6>
+                                                            <small class="text-muted" style="font-size: 0.75rem;"><?php echo date('d M Y, H:i', strtotime($c['created_at'])); ?></small>
+                                                        </div>
+                                                        <p class="mb-0 small" style="white-space: pre-line;"><?php echo htmlspecialchars($c['comment']); ?></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <p class="text-muted small italic">Belum ada diskusi untuk laporan ini.</p>
+                                    <?php endif; ?>
+                                </div>
+
+                                <!-- Form Komentar -->
+                                <?php if (isset($_SESSION['user_id'])): ?>
+                                    <form action="track.php?tracking_id=<?php echo urlencode($report_detail['tracking_code']); ?>" method="POST">
+                                        <div class="mb-3">
+                                            <textarea name="comment" class="form-control bg-light" rows="3" placeholder="Tulis komentar atau balasan Anda di sini..." required></textarea>
+                                        </div>
+                                        <div class="text-end">
+                                            <button type="submit" name="submit_comment" class="btn btn-primary btn-sm px-4 fw-bold"><i class="fas fa-paper-plane me-1"></i> Kirim</button>
+                                        </div>
+                                    </form>
+                                <?php else: ?>
+                                    <div class="alert alert-warning py-2 small">
+                                        Silakan <a href="login.php" class="alert-link">Login</a> untuk ikut berdiskusi.
+                                    </div>
+                                <?php endif; ?>
+                            </div>
 
                         </div>
                     </div>

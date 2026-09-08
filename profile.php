@@ -25,6 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $error = "Nama lengkap tidak boleh kosong.";
     } elseif (!empty($new_password) && $new_password !== $confirm_password) {
         $error = "Konfirmasi password tidak cocok!";
+    } elseif (!empty($new_password) && !preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $new_password)) {
+        $error = "Password harus minimal 8 karakter, mengandung huruf besar, huruf kecil, dan angka!";
     } else {
         try {
             if (!empty($new_password)) {
@@ -157,12 +159,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <!-- Password Baru -->
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold small">Password Baru</label>
-                                    <input type="password" name="password" class="form-control" placeholder="Password baru...">
+                                    <label class="form-label text-muted fw-bold small">Password Baru <span class="text-secondary fw-normal">(Kosongkan jika tidak ingin mengubah)</span></label>
+                                    <input type="password" name="password" class="form-control bg-light" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}" title="Minimal 8 karakter, mengandung huruf besar, huruf kecil, dan angka">
                                 </div>
                                 <div class="col-md-6 mb-4">
-                                    <label class="form-label fw-bold small">Konfirmasi Password</label>
-                                    <input type="password" name="confirm_password" class="form-control" placeholder="Ulangi password...">
+                                    <label class="form-label text-muted fw-bold small">Konfirmasi Password Baru</label>
+                                    <input type="password" name="confirm_password" class="form-control bg-light">
                                 </div>
                             </div>
 

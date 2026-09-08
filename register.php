@@ -6,7 +6,7 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $nik = $_POST['nik'] ?? '';
+    $email = $_POST['email'] ?? '';
     $username = $_POST['username'] ?? '';
     $name = $_POST['name'] ?? '';
     $password = $_POST['password'] ?? '';
@@ -14,17 +14,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if ($password !== $confirm_password) {
         $error = "Konfirmasi password tidak cocok!";
+    } elseif (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $password)) {
+        $error = "Password harus minimal 8 karakter, mengandung huruf besar, huruf kecil, dan angka!";
     } else {
-        // Cek username atau NIK sudah ada atau belum
-        $stmt_check = $pdo->prepare("SELECT id FROM users WHERE username = ? OR nik = ?");
-        $stmt_check->execute([$username, $nik]);
+        // Cek username atau email sudah ada atau belum
+        $stmt_check = $pdo->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
+        $stmt_check->execute([$username, $email]);
         if ($stmt_check->rowCount() > 0) {
-            $error = "Username atau NIK tersebut sudah terdaftar! Silakan login.";
+            $error = "Username atau Email tersebut sudah terdaftar! Silakan login.";
         } else {
             $hashed = password_hash($password, PASSWORD_DEFAULT);
             try {
-                $stmt = $pdo->prepare("INSERT INTO users (name, username, nik, password, role) VALUES (?, ?, ?, ?, 'pelapor')");
-                $stmt->execute([$name, $username, $nik, $hashed]);
+                $stmt = $pdo->prepare("INSERT INTO users (name, username, email, password, role) VALUES (?, ?, ?, ?, 'pelapor')");
+                $stmt->execute([$name, $username, $email, $hashed]);
                 // Setelah registrasi berhasil, langsung arahkan ke halaman login
                 header("Location: login.php?registered=1");
                 exit;
@@ -69,8 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         
                         <form action="" method="POST">
                             <div class="mb-3">
-                                <label class="form-label text-muted fw-bold small">NIK (16 Digit) <span class="text-danger">*</span></label>
-                                <input type="text" name="nik" class="form-control bg-light" required maxlength="16" pattern="[0-9]{16}" title="Masukkan 16 digit NIK" placeholder="Masukkan NIK Anda">
+                                <label class="form-label text-muted fw-bold small">Alamat Email <span class="text-danger">*</span></label>
+                                <input type="email" name="email" class="form-control bg-light" required placeholder="Masukkan Email Anda">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label text-muted fw-bold small">Username <span class="text-danger">*</span></label>
@@ -83,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted fw-bold small">Password <span class="text-danger">*</span></label>
-                                    <input type="password" name="password" class="form-control bg-light" required>
+                                    <input type="password" name="password" class="form-control bg-light" required pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}" title="Minimal 8 karakter, mengandung huruf besar, huruf kecil, dan angka">
                                 </div>
                                 <div class="col-md-6 mb-4">
                                     <label class="form-label text-muted fw-bold small">Konfirmasi <span class="text-danger">*</span></label>

@@ -14,30 +14,59 @@ $message = '';
 
 // Proses Update Status & Tanggapan
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $status = $_POST['status'];
-    $tanggapan = $_POST['tanggapan'];
+    if (isset($_POST['submit_comment'])) {
+        $comment_text = trim($_POST['comment']);
+        if (!empty($comment_text)) {
+            $stmt_ins = $pdo->prepare("INSERT INTO comments (report_id, user_id, comment) VALUES (?, ?, ?)");
+            $stmt_ins->execute([$id, $_SESSION['user_id'], $comment_text]);
+            $message = "<div class='alert alert-success alert-dismissible fade show shadow-sm border-0 border-start border-5 border-success'>
+                            <i class='fas fa-check-circle me-2'></i> Komentar berhasil ditambahkan!
+                            <button type='button' class='btn-close' data-bs-dismiss='alert'></button>
+                        </div>";
+        }
+    } else {
+        $status = $_POST['status'];
+        $tanggapan = $_POST['tanggapan'];
 
-    try {
-        $stmt = $pdo->prepare("UPDATE reports SET status = ?, tanggapan = ? WHERE id = ?");
-        $stmt->execute([$status, $tanggapan, $id]);
-        $message = "<div class='alert alert-success alert-dismissible fade show shadow-sm border-0 border-start border-5 border-success'>
-                        <i class='fas fa-check-circle me-2'></i> Status dan tanggapan berhasil diperbarui!
-                        <button type='button' class='btn-close' data-bs-dismiss='alert'></button>
+        try {
+            $stmt = $pdo->prepare("UPDATE reports SET status = ?, tanggapan = ? WHERE id = ?");
+            $stmt->execute([$status, $tanggapan, $id]);
+            $message = "<div class='alert alert-success alert-dismissible fade show shadow-sm border-0 border-start border-5 border-success'>
+                            <i class='fas fa-check-circle me-2'></i> Status dan tanggapan berhasil diperbarui!
+                            <button type='button' class='btn-close' data-bs-dismiss='alert'></button>
                     </div>";
-    } catch (PDOException $e) {
-        $message = "<div class='alert alert-danger'><i class='fas fa-exclamation-triangle me-2'></i> Gagal memperbarui: " . $e->getMessage() . "</div>";
+
+        } catch (PDOException $e) {
+            $message = "<div class='alert alert-danger'>Error: " . $e->getMessage() . "</div>";
+        }
     }
 }
 
 // Ambil Data Laporan
 try {
+    // Mark as read when admin opens detail
+    $pdo->prepare("UPDATE reports SET is_read = 1 WHERE id = ?")->execute([$id]);
+
     $stmt = $pdo->prepare("SELECT * FROM reports WHERE id = ?");
     $stmt->execute([$id]);
     $report = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$report) {
-        die("Data laporan tidak ditemukan.");
+        echo "<script>alert('Laporan tidak ditemukan!'); window.location='reports.php';</script>";
+        exit;
     }
+
+    // Ambil komentar
+    $stmt_comments = $pdo->prepare("
+        SELECT c.*, u.name, u.role 
+        FROM comments c 
+        JOIN users u ON c.user_id = u.id 
+        WHERE c.report_id = ? 
+        ORDER BY c.created_at ASC
+    ");
+    $stmt_comments->execute([$id]);
+    $comments = $stmt_comments->fetchAll(PDO::FETCH_ASSOC);
+
 } catch (PDOException $e) {
     die("Error: " . $e->getMessage());
 }
@@ -123,6 +152,53 @@ require_once 'layouts/sidebar.php';
                         <?php endif; ?>
                     </div>
                 </div>
+                
+                <!-- KOMENTAR SECTION -->
+                <div class="card border-0 shadow-sm mb-4 border-top border-info border-4 mt-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold"><i class="fas fa-comments me-2 text-info"></i> Kolom Diskusi / Komentar</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-4">
+                            <?php if (!empty($comments)): ?>
+                                <?php foreach ($comments as $c): ?>
+                                    <div class="d-flex mb-3">
+                                        <div class="flex-shrink-0">
+                                            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-weight: bold;">
+                                                <?php echo strtoupper(substr($c['name'], 0, 1)); ?>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="bg-light p-3 rounded shadow-sm">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <h6 class="fw-bold mb-0">
+                                                        <?php echo htmlspecialchars($c['name']); ?>
+                                                        <?php if ($c['role'] == 'admin' || $c['role'] == 'kabid'): ?>
+                                                            <span class="badge bg-danger ms-1" style="font-size: 0.65em;">Admin</span>
+                                                        <?php endif; ?>
+                                                    </h6>
+                                                    <small class="text-muted" style="font-size: 0.75rem;"><?php echo date('d M Y, H:i', strtotime($c['created_at'])); ?></small>
+                                                </div>
+                                                <p class="mb-0 small" style="white-space: pre-line;"><?php echo htmlspecialchars($c['comment']); ?></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <p class="text-muted small italic">Belum ada diskusi untuk laporan ini.</p>
+                            <?php endif; ?>
+                        </div>
+
+                        <form action="" method="POST">
+                            <div class="mb-3">
+                                <textarea name="comment" class="form-control bg-light" rows="3" placeholder="Tulis komentar/balasan Anda di sini..." required></textarea>
+                            </div>
+                            <div class="text-end">
+                                <button type="submit" name="submit_comment" class="btn btn-info text-white fw-bold"><i class="fas fa-paper-plane me-1"></i> Kirim Komentar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
 
             <div class="col-lg-5">
@@ -135,7 +211,7 @@ require_once 'layouts/sidebar.php';
                             <div class="mb-4">
                                 <label class="form-label fw-bold">Ubah Status Laporan</label>
                                 <select name="status" class="form-select form-select-lg shadow-sm" required>
-                                    <option value="Menunggu" <?php echo ($report['status'] == 'Menunggu') ? 'selected' : ''; ?>>🟡 Pending (Menunggu dikonfirmasi)</option>
+                                    <option value="Diproses" <?php echo ($report['status'] == 'Diproses') ? 'selected' : ''; ?>>🟡 Pending (Sedang Diproses)</option>
                                     <option value="Disetujui" <?php echo ($report['status'] == 'Disetujui') ? 'selected' : ''; ?>>🟢 Disetujui</option>
                                     <option value="Ditolak" <?php echo ($report['status'] == 'Ditolak') ? 'selected' : ''; ?>>🔴 Ditolak (Laporan Tidak Valid)</option>
                                 </select>
