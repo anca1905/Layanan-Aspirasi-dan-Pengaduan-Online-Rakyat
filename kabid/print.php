@@ -215,16 +215,6 @@ if (!empty($_GET['cari']))   $filter_label .= ' | Pencarian: ' . htmlspecialchar
         &nbsp;&bull;&nbsp;Dicetak oleh: <?php echo htmlspecialchars($kabid_name); ?>
     </div>
 
-    <!-- RINGKASAN -->
-    <?php
-    $summary_total = count($reports);
-    $summary_disetujui  = count(array_filter($reports, fn($r) => strtolower($r['status']) === 'disetujui'));
-    ?>
-    <div class="summary-box">
-        <div class="summary-item"><strong><?php echo $summary_total; ?></strong>Total Laporan</div>
-        <div class="summary-item"><strong><?php echo $summary_disetujui; ?></strong>Disetujui</div>
-    </div>
-
     <!-- TABEL DATA -->
     <table>
         <thead>
