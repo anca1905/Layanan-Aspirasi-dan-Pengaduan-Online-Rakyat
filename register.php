@@ -14,6 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if ($password !== $confirm_password) {
         $error = "Konfirmasi password tidak cocok!";
+    } elseif (!preg_match('/^[a-zA-Z0-9]+$/', $username)) {
+        $error = "Username hanya boleh berisi huruf dan angka, tanpa spasi atau karakter khusus!";
     } elseif (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $password)) {
         $error = "Password harus minimal 8 karakter, mengandung huruf besar, huruf kecil, dan angka!";
     } else {

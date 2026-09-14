@@ -40,6 +40,7 @@ try {
 
 $page_title = 'Data Laporan - Kabid Pemkab Bombana';
 $active_menu = 'reports';
+
 require_once 'layouts/header.php';
 require_once 'layouts/sidebar.php';
 ?>

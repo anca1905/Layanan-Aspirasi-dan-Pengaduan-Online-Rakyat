@@ -58,6 +58,43 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt = $pdo->prepare("INSERT INTO reports (tracking_code, user_id, reporter_name, location, kecamatan, desa, severity, latitude, longitude, photo, description, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Diproses')");
         $stmt->execute([$tracking_code, $user_id, $nama, $lokasi, $kecamatan, $desa, $severity, $lat, $lng, $foto, $deskripsi]);
 
+        // Notifikasi email ke admin PUPR
+        try {
+            $stmtAdmin = $pdo->prepare("SELECT email FROM users WHERE role = 'admin' AND email IS NOT NULL LIMIT 1");
+            $stmtAdmin->execute();
+            if ($admin = $stmtAdmin->fetch()) {
+                $admin_email = $admin['email'];
+                require_once 'vendor/autoload.php';
+                $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+                $mail->isSMTP();
+                $mail->Host       = 'smtp.gmail.com'; 
+                $mail->SMTPAuth   = true;
+                $mail->Username   = 'arsyadhijrah49720@gmail.com'; 
+                $mail->Password   = 'kxzq hgzn fewa nruj'; 
+                $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+                $mail->Port       = 587;
+                $mail->setFrom('noreply@bombanakab.go.id', 'Sistem Pengaduan Bombana');
+                $mail->addAddress($admin_email);
+                $mail->isHTML(true);
+                $mail->Subject = 'Laporan Jalan Rusak Baru - ' . $tracking_code;
+                $mail->Body    = "
+                    <h3>Halo Admin PUPR,</h3>
+                    <p>Ada laporan jalan rusak baru dari pelapor <strong>{$nama}</strong>.</p>
+                    <ul>
+                        <li><strong>Kode Laporan:</strong> {$tracking_code}</li>
+                        <li><strong>Kecamatan:</strong> {$kecamatan}</li>
+                        <li><strong>Desa:</strong> {$desa}</li>
+                        <li><strong>Tingkat Kerusakan:</strong> {$severity}</li>
+                        <li><strong>Lokasi:</strong> {$lokasi}</li>
+                    </ul>
+                    <p>Silakan login ke sistem untuk menindaklanjuti laporan ini.</p>
+                ";
+                $mail->send();
+            }
+        } catch (Exception $e) {
+            // Abaikan error email agar laporan tetap tersimpan
+        }
+
         $message = "<div class='alert alert-success shadow-sm border-0 border-start border-5 border-success rounded-end'>
                         <h5 class='alert-heading fw-bold'><i class='fas fa-check-circle me-2'></i>Laporan Berhasil Terkirim!</h5>
                         <p>Terima kasih. Laporan Anda beserta titik koordinat lokasi telah masuk ke sistem kami.</p>
