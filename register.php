@@ -28,44 +28,46 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $hashed = password_hash($password, PASSWORD_DEFAULT);
             $verification_token = bin2hex(random_bytes(16));
             try {
+                $pdo->beginTransaction();
                 $stmt = $pdo->prepare("INSERT INTO users (name, username, email, password, role, is_verified, verification_token) VALUES (?, ?, ?, ?, 'pelapor', 0, ?)");
                 $stmt->execute([$name, $username, $email, $hashed, $verification_token]);
                 
                 // Kirim email verifikasi
                 require_once 'vendor/autoload.php';
                 $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
-                try {
-                    $mail->isSMTP();
-                    $mail->Host       = 'smtp.gmail.com'; 
-                    $mail->SMTPAuth   = true;
-                    $mail->Username   = 'arsyadhijrah49720@gmail.com'; 
-                    $mail->Password   = 'kxzq hgzn fewa nruj'; 
-                    $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
-                    $mail->Port       = 587;
-                    
-                    $mail->setFrom('noreply@bombanakab.go.id', 'Sistem Pengaduan Bombana');
-                    $mail->addAddress($email);
-                    
-                    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
-                    $host = $_SERVER['HTTP_HOST'];
-                    $path = rtrim(str_replace('\\', '/', dirname($_SERVER['PHP_SELF'])), '/');
-                    $verify_link = "$protocol://$host$path/verify.php?token=$verification_token";
-                    
-                    $mail->isHTML(true);
-                    $mail->Subject = 'Verifikasi Email Akun Anda';
-                    $mail->Body    = "
-                        <h3>Halo {$name},</h3>
-                        <p>Terima kasih telah mendaftar di Sistem Pengaduan Jalan Kabupaten Bombana.</p>
-                        <p>Silakan klik link di bawah ini untuk memverifikasi alamat email Anda dan mengaktifkan akun:</p>
-                        <p><a href='{$verify_link}' style='padding: 10px 15px; background-color: #8B0000; color: white; text-decoration: none; border-radius: 5px;'>Verifikasi Email</a></p>
-                    ";
-                    $mail->send();
-                    $success = "Registrasi berhasil! Silakan cek email Anda untuk memverifikasi akun sebelum login.";
-                } catch (Exception $e) {
-                    $error = "Registrasi berhasil, tetapi gagal mengirim email verifikasi. Hubungi admin.";
+                $mail->isSMTP();
+                $mail->Host       = 'smtp.gmail.com'; 
+                $mail->SMTPAuth   = true;
+                $mail->Username   = 'arsyadhijrah49720@gmail.com'; 
+                $mail->Password   = 'kxzq hgzn fewa nruj'; 
+                $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+                $mail->Port       = 587;
+                
+                $mail->setFrom('noreply@bombanakab.go.id', 'Sistem Pengaduan Bombana');
+                $mail->addAddress($email);
+                
+                $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+                $host = $_SERVER['HTTP_HOST'];
+                $path = rtrim(str_replace('\\', '/', dirname($_SERVER['PHP_SELF'])), '/');
+                $verify_link = "$protocol://$host$path/verify.php?token=$verification_token";
+                
+                $mail->isHTML(true);
+                $mail->Subject = 'Verifikasi Email Akun Anda';
+                $mail->Body    = "
+                    <h3>Halo {$name},</h3>
+                    <p>Terima kasih telah mendaftar di Sistem Pengaduan Jalan Kabupaten Bombana.</p>
+                    <p>Silakan klik link di bawah ini untuk memverifikasi alamat email Anda dan mengaktifkan akun:</p>
+                    <p><a href='{$verify_link}' style='padding: 10px 15px; background-color: #8B0000; color: white; text-decoration: none; border-radius: 5px;'>Verifikasi Email</a></p>
+                ";
+                $mail->send();
+                
+                $pdo->commit();
+                $success = "Registrasi berhasil! Silakan cek email Anda (termasuk folder Spam) untuk memverifikasi akun.";
+            } catch (Exception $e) {
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
                 }
-            } catch (PDOException $e) {
-                $error = "Terjadi kesalahan sistem: " . $e->getMessage();
+                $error = "Gagal mengirim email verifikasi. Pastikan email Anda valid, atau coba beberapa saat lagi.";
             }
         }
     }
@@ -103,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <?php if ($error): ?> <div class="alert alert-danger py-2 small"><i class="fas fa-exclamation-circle me-1"></i> <?php echo $error; ?></div> <?php endif; ?>
                         <?php if ($success): ?> <div class="alert alert-success py-2 small"><i class="fas fa-check-circle me-1"></i> <?php echo $success; ?></div> <?php endif; ?>
                         
-                        <form action="" method="POST">
+                        <form action="" method="POST" onsubmit="document.getElementById('btnSubmit').disabled = true; document.getElementById('btnSubmit').innerHTML = '<i class=\'fas fa-spinner fa-spin me-2\'></i> MEMPROSES...';">
                             <div class="mb-3">
                                 <label class="form-label text-muted fw-bold small">Alamat Email <span class="text-danger">*</span></label>
                                 <input type="email" name="email" class="form-control bg-light" required placeholder="Masukkan Email Anda">
@@ -127,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 </div>
                             </div>
                             <div class="d-grid mb-3">
-                                <button type="submit" class="btn btn-primary fw-bold py-2"><i class="fas fa-user-plus me-2"></i> DAFTAR SEKARANG</button>
+                                <button type="submit" id="btnSubmit" class="btn btn-primary fw-bold py-2"><i class="fas fa-user-plus me-2"></i> DAFTAR SEKARANG</button>
                             </div>
                         </form>
                         <hr class="text-muted">
