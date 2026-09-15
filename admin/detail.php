@@ -31,6 +31,46 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         try {
             $stmt = $pdo->prepare("UPDATE reports SET status = ?, tanggapan = ? WHERE id = ?");
             $stmt->execute([$status, $tanggapan, $id]);
+            
+            // Notifikasi email ke pelapor
+            try {
+                $stmtReporter = $pdo->prepare("SELECT u.email, u.name, r.tracking_code FROM reports r JOIN users u ON r.user_id = u.id WHERE r.id = ? AND u.email IS NOT NULL");
+                $stmtReporter->execute([$id]);
+                if ($reporter = $stmtReporter->fetch()) {
+                    require_once '../vendor/autoload.php';
+                    $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+                    
+                    $mail->isSMTP();
+                    $mail->Host       = 'smtp.gmail.com'; 
+                    $mail->SMTPAuth   = true;
+                    $mail->Username   = 'arsyadhijrah49720@gmail.com'; 
+                    $mail->Password   = 'kxzq hgzn fewa nruj'; 
+                    $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port       = 587;
+                    
+                    $mail->setFrom('noreply@bombanakab.go.id', 'Sistem Pengaduan Bombana');
+                    $mail->addAddress($reporter['email']);
+                    
+                    $mail->isHTML(true);
+                    $mail->Subject = 'Pembaruan Status Laporan Anda - ' . $reporter['tracking_code'];
+                    $mail->Body    = "
+                        <h3>Halo {$reporter['name']},</h3>
+                        <p>Status laporan jalan rusak Anda dengan kode <strong>{$reporter['tracking_code']}</strong> telah diperbarui.</p>
+                        <p><strong>Status Baru:</strong> {$status}</p>
+                        <p><strong>Tanggapan Instansi:</strong></p>
+                        <blockquote style='border-left: 4px solid #8B0000; padding-left: 10px; margin-left: 0;'>
+                            " . nl2br(htmlspecialchars($tanggapan)) . "
+                        </blockquote>
+                        <p>Silakan login ke sistem untuk mengecek riwayat secara lengkap.</p>
+                        <br>
+                        <p>Terima kasih,<br>Tim IT Pemkab Bombana</p>
+                    ";
+                    $mail->send();
+                }
+            } catch (Exception $e) {
+                // Abaikan error email
+            }
+
             $message = "<div class='alert alert-success alert-dismissible fade show shadow-sm border-0 border-start border-5 border-success'>
                             <i class='fas fa-check-circle me-2'></i> Status dan tanggapan berhasil diperbarui!
                             <button type='button' class='btn-close' data-bs-dismiss='alert'></button>

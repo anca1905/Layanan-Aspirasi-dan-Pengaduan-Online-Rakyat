@@ -26,12 +26,44 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $error = "Username atau Email tersebut sudah terdaftar! Silakan login.";
         } else {
             $hashed = password_hash($password, PASSWORD_DEFAULT);
+            $verification_token = bin2hex(random_bytes(16));
             try {
-                $stmt = $pdo->prepare("INSERT INTO users (name, username, email, password, role) VALUES (?, ?, ?, ?, 'pelapor')");
-                $stmt->execute([$name, $username, $email, $hashed]);
-                // Setelah registrasi berhasil, langsung arahkan ke halaman login
-                header("Location: login.php?registered=1");
-                exit;
+                $stmt = $pdo->prepare("INSERT INTO users (name, username, email, password, role, is_verified, verification_token) VALUES (?, ?, ?, ?, 'pelapor', 0, ?)");
+                $stmt->execute([$name, $username, $email, $hashed, $verification_token]);
+                
+                // Kirim email verifikasi
+                require_once 'vendor/autoload.php';
+                $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+                try {
+                    $mail->isSMTP();
+                    $mail->Host       = 'smtp.gmail.com'; 
+                    $mail->SMTPAuth   = true;
+                    $mail->Username   = 'arsyadhijrah49720@gmail.com'; 
+                    $mail->Password   = 'kxzq hgzn fewa nruj'; 
+                    $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port       = 587;
+                    
+                    $mail->setFrom('noreply@bombanakab.go.id', 'Sistem Pengaduan Bombana');
+                    $mail->addAddress($email);
+                    
+                    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+                    $host = $_SERVER['HTTP_HOST'];
+                    $path = rtrim(str_replace('\\', '/', dirname($_SERVER['PHP_SELF'])), '/');
+                    $verify_link = "$protocol://$host$path/verify.php?token=$verification_token";
+                    
+                    $mail->isHTML(true);
+                    $mail->Subject = 'Verifikasi Email Akun Anda';
+                    $mail->Body    = "
+                        <h3>Halo {$name},</h3>
+                        <p>Terima kasih telah mendaftar di Sistem Pengaduan Jalan Kabupaten Bombana.</p>
+                        <p>Silakan klik link di bawah ini untuk memverifikasi alamat email Anda dan mengaktifkan akun:</p>
+                        <p><a href='{$verify_link}' style='padding: 10px 15px; background-color: #8B0000; color: white; text-decoration: none; border-radius: 5px;'>Verifikasi Email</a></p>
+                    ";
+                    $mail->send();
+                    $success = "Registrasi berhasil! Silakan cek email Anda untuk memverifikasi akun sebelum login.";
+                } catch (Exception $e) {
+                    $error = "Registrasi berhasil, tetapi gagal mengirim email verifikasi. Hubungi admin.";
+                }
             } catch (PDOException $e) {
                 $error = "Terjadi kesalahan sistem: " . $e->getMessage();
             }

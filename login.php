@@ -19,21 +19,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if (password_verify($password, $user['password']) || md5($password) === $user['password']) {
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['username'] = $user['username'];
-                $_SESSION['name'] = $user['name'];
-                $_SESSION['email'] = $user['email'];
-                $_SESSION['role'] = $user['role'];
-                
-                if ($user['role'] === 'admin') {
-                    header("Location: admin/index.php");
-                    exit;
-                } elseif ($user['role'] === 'kabid') {
-                    header("Location: kabid/index.php");
-                    exit;
-                } elseif ($user['role'] === 'pelapor') {
-                    header("Location: submit_report.php");
-                    exit;
+                if ($user['role'] === 'pelapor' && isset($user['is_verified']) && $user['is_verified'] == 0) {
+                    $error = "Akun Anda belum diverifikasi. Silakan cek email Anda untuk memverifikasi akun.";
+                } else {
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['username'] = $user['username'];
+                    $_SESSION['name'] = $user['name'];
+                    $_SESSION['email'] = $user['email'];
+                    $_SESSION['role'] = $user['role'];
+                    
+                    if ($user['role'] === 'admin') {
+                        header("Location: admin/index.php");
+                        exit;
+                    } elseif ($user['role'] === 'kabid') {
+                        header("Location: kabid/index.php");
+                        exit;
+                    } elseif ($user['role'] === 'pelapor') {
+                        header("Location: submit_report.php");
+                        exit;
+                    }
                 }
             } else {
                 $error = "Password yang Anda masukkan salah!";
