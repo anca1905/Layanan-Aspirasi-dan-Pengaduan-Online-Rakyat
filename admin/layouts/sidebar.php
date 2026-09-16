@@ -13,6 +13,7 @@
                 ?>
                 <a href="index.php" class="<?php echo (isset($active_menu) && $active_menu == 'dashboard') ? 'active' : ''; ?>"><i class="fas fa-home me-2"></i> Dashboard</a>
                 <a href="reports.php" class="<?php echo (isset($active_menu) && $active_menu == 'reports') ? 'active' : ''; ?>"><i class="fas fa-file-alt me-2"></i> Data Laporan <?php echo $unread_badge; ?></a>
+                <a href="pelaporan.php" class="<?php echo (isset($active_menu) && $active_menu == 'pelaporan') ? 'active' : ''; ?>"><i class="fas fa-print me-2"></i> Pelaporan (Cetak)</a>
                 <a href="map.php" class="<?php echo (isset($active_menu) && $active_menu == 'map') ? 'active' : ''; ?>"><i class="fas fa-map-marked-alt me-2"></i> Peta Sebaran</a>
                 <a href="users.php" class="<?php echo (isset($active_menu) && $active_menu == 'users') ? 'active' : ''; ?>"><i class="fas fa-users me-2"></i> Kelola Pengguna</a>
                 <a href="settings.php" class="<?php echo (isset($active_menu) && $active_menu == 'settings') ? 'active' : ''; ?>"><i class="fas fa-cog me-2"></i> Pengaturan</a>

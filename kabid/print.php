@@ -39,6 +39,22 @@ if (!empty($_GET['cari'])) {
     $params[] = "%" . $_GET['cari'] . "%";
     $params[] = "%" . $_GET['cari'] . "%";
 }
+if (!empty($_GET['kecamatan'])) {
+    $where   .= " AND kecamatan = ?";
+    $params[] = $_GET['kecamatan'];
+}
+if (!empty($_GET['kategori'])) {
+    $where   .= " AND severity = ?";
+    $params[] = $_GET['kategori'];
+}
+if (!empty($_GET['tahun'])) {
+    $where   .= " AND YEAR(created_at) = ?";
+    $params[] = $_GET['tahun'];
+}
+if (!empty($_GET['bulan'])) {
+    $where   .= " AND MONTH(created_at) = ?";
+    $params[] = $_GET['bulan'];
+}
 
 try {
     $stmt = $pdo->prepare("SELECT * FROM reports WHERE $where ORDER BY created_at DESC");
@@ -52,6 +68,10 @@ try {
 $filter_label = '';
 if (!empty($_GET['status'])) $filter_label .= ' | Status: ' . htmlspecialchars($_GET['status']);
 if (!empty($_GET['cari']))   $filter_label .= ' | Pencarian: ' . htmlspecialchars($_GET['cari']);
+if (!empty($_GET['kecamatan'])) $filter_label .= ' | Kec: ' . htmlspecialchars($_GET['kecamatan']);
+if (!empty($_GET['kategori'])) $filter_label .= ' | Kategori: ' . htmlspecialchars($_GET['kategori']);
+if (!empty($_GET['bulan'])) $filter_label .= ' | Bulan: ' . htmlspecialchars($_GET['bulan']);
+if (!empty($_GET['tahun'])) $filter_label .= ' | Tahun: ' . htmlspecialchars($_GET['tahun']);
 ?>
 <!DOCTYPE html>
 <html lang="id">

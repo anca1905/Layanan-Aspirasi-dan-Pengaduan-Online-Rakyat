@@ -71,15 +71,7 @@ require_once 'layouts/sidebar.php';
                                 <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search me-2"></i> Tampilkan</button>
                             </div>
                             <div class="col-md-3 text-end">
-                                <?php
-                                $print_query = http_build_query([
-                                    'status'    => $_GET['status'] ?? '',
-                                    'cari'      => $_GET['cari']   ?? '',
-                                    'kecamatan' => $_GET['kecamatan'] ?? '',
-                                    'desa'      => $_GET['desa'] ?? ''
-                                ]);
-                                ?>
-                                <a href="print.php?<?php echo $print_query; ?>" target="_blank" class="btn btn-warning fw-bold text-dark"><i class="fas fa-print me-2"></i> Cetak Laporan</a>
+                                <!-- Tombol cetak dipindahkan ke menu Pelaporan -->
                             </div>
                         </form>
 
