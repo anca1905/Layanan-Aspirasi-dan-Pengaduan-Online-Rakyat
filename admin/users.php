@@ -97,9 +97,9 @@ require_once 'layouts/sidebar.php';
                             <div class="card-header bg-white py-3">
                                 <h5 class="mb-0 fw-bold"><i class="fas fa-users me-2 text-secondary"></i> Daftar Pengguna</h5>
                             </div>
-                            <div class="card-body p-0">
+                            <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table table-hover align-middle mb-0">
+                                    <table class="table table-hover align-middle datatable">
                                         <thead class="table-light">
                                             <tr>
                                                 <th class="ps-4">No</th>

@@ -76,7 +76,7 @@ require_once 'layouts/sidebar.php';
                         </form>
 
                         <div class="table-responsive">
-                            <table class="table table-bordered table-hover align-middle text-center">
+                            <table class="table table-bordered table-hover align-middle text-center datatable">
                                 <thead class="table-light">
                                     <tr>
                                         <th>No</th>

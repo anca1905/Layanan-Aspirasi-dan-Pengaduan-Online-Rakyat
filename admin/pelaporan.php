@@ -150,7 +150,7 @@ require_once 'layouts/sidebar.php';
                     <div class="card-body">
                         <h6 class="text-muted mb-3">Ditemukan <strong><?php echo count($reports); ?></strong> laporan sesuai filter.</h6>
                         <div class="table-responsive">
-                            <table class="table table-bordered table-hover align-middle text-center" style="font-size: 0.9rem;">
+                            <table class="table table-bordered table-hover align-middle text-center datatable" style="font-size: 0.9rem;">
                                 <thead class="table-light">
                                     <tr>
                                         <th>No</th>
