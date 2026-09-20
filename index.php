@@ -41,7 +41,7 @@ try {
                     <li class="nav-item"><a class="nav-link" href="submit_report.php">Buat Laporan</a></li>
                     <li class="nav-item"><a class="nav-link" href="track.php">Riwayat Laporan</a></li>
                     <?php if (!empty($setting['guide_path'])): ?>
-                    <li class="nav-item"><a class="nav-link" href="uploads/<?php echo $setting['guide_path']; ?>" target="_blank"><i class="fas fa-file-pdf me-1"></i> Panduan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#guideModal"><i class="fas fa-file-pdf me-1"></i> Panduan</a></li>
                     <?php endif; ?>
 
                     <?php if (isset($_SESSION['user_id']) || isset($_SESSION['role'])): ?>
@@ -66,7 +66,7 @@ try {
                         <a href="submit_report.php" class="btn btn-warning btn-lg shadow w-100 w-md-auto"><i class="fas fa-pen me-2"></i> Buat Laporan</a>
                         <a href="track.php" class="btn btn-outline-light btn-lg shadow w-100 w-md-auto" style="border-width: 2px;"><i class="fas fa-history me-2"></i> Riwayat Laporan</a>
                         <?php if (!empty($setting['guide_path'])): ?>
-                        <a href="uploads/<?php echo $setting['guide_path']; ?>" target="_blank" class="btn btn-info btn-lg shadow w-100 w-md-auto text-white" style="border-width: 2px;"><i class="fas fa-book me-2"></i> Panduan Penggunaan</a>
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#guideModal" class="btn btn-info btn-lg shadow w-100 w-md-auto text-white" style="border-width: 2px;"><i class="fas fa-book me-2"></i> Panduan Penggunaan</a>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -111,6 +111,23 @@ try {
             </div>
         </div>
     </div>
+
+    <?php if (!empty($setting['guide_path'])): ?>
+    <!-- Modal Panduan Penggunaan -->
+    <div class="modal fade" id="guideModal" tabindex="-1" aria-labelledby="guideModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="guideModalLabel"><i class="fas fa-book me-2"></i>Panduan Penggunaan Sistem</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <iframe src="uploads/<?php echo htmlspecialchars($setting['guide_path']); ?>" width="100%" height="600px" style="border: none;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <footer>
         <div class="container">
