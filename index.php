@@ -1,3 +1,14 @@
+<?php
+session_start();
+require_once 'config/database.php';
+
+try {
+    $stmt = $pdo->query("SELECT * FROM settings WHERE id = 1");
+    $setting = $stmt->fetch(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $setting = [];
+}
+?>
 <!DOCTYPE html>
 <html lang="id">
 
@@ -29,6 +40,9 @@
                     <li class="nav-item"><a class="nav-link active" href="index.php">Beranda</a></li>
                     <li class="nav-item"><a class="nav-link" href="submit_report.php">Buat Laporan</a></li>
                     <li class="nav-item"><a class="nav-link" href="track.php">Riwayat Laporan</a></li>
+                    <?php if (!empty($setting['guide_path'])): ?>
+                    <li class="nav-item"><a class="nav-link" href="uploads/<?php echo $setting['guide_path']; ?>" target="_blank"><i class="fas fa-file-pdf me-1"></i> Panduan</a></li>
+                    <?php endif; ?>
 
                     <?php if (isset($_SESSION['user_id']) || isset($_SESSION['role'])): ?>
                         <li class="nav-item ms-lg-3"><a class="btn btn-outline-danger btn-sm px-3 rounded-pill" href="logout.php"><i class="fas fa-sign-out-alt me-1"></i> Keluar</a></li>
@@ -51,6 +65,9 @@
                     <div class="d-flex flex-column flex-md-row gap-3 justify-content-center mt-4">
                         <a href="submit_report.php" class="btn btn-warning btn-lg shadow w-100 w-md-auto"><i class="fas fa-pen me-2"></i> Buat Laporan</a>
                         <a href="track.php" class="btn btn-outline-light btn-lg shadow w-100 w-md-auto" style="border-width: 2px;"><i class="fas fa-history me-2"></i> Riwayat Laporan</a>
+                        <?php if (!empty($setting['guide_path'])): ?>
+                        <a href="uploads/<?php echo $setting['guide_path']; ?>" target="_blank" class="btn btn-info btn-lg shadow w-100 w-md-auto text-white" style="border-width: 2px;"><i class="fas fa-book me-2"></i> Panduan Penggunaan</a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

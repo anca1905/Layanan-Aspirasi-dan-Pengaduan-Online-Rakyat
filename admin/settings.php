@@ -22,7 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_settings'])) {
     $instansi_contact = $_POST['instansi_contact'];
 
     $logo_sql = "";
+    $guide_sql = "";
     $params = [$site_name, $instansi_name, $instansi_address, $instansi_contact];
+    
     // Handle logo upload
     if (isset($_FILES['logo']) && $_FILES['logo']['error'] == 0) {
         $fileType = $_FILES['logo']['type'];
@@ -34,16 +36,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_settings'])) {
             if (move_uploaded_file($_FILES['logo']['tmp_name'], '../assets/img/' . $newFileName)) {
                 $logo_sql = ", logo_path = ?";
                 $params[] = $newFileName;
-                // Delete old logo if it's not the default or maybe keep it, but it's ok.
             }
         } else {
             $msg = "<div class='alert alert-danger'>Format logo hanya boleh PNG / JPG.</div>";
         }
     }
 
+    // Handle guide pdf upload
+    if (empty($msg) && isset($_FILES['guide_pdf']) && $_FILES['guide_pdf']['error'] == 0) {
+        $fileType = $_FILES['guide_pdf']['type'];
+        $allowedPdf = ['application/pdf'];
+        if (in_array($fileType, $allowedPdf) || pathinfo($_FILES['guide_pdf']['name'], PATHINFO_EXTENSION) == 'pdf') {
+            $ext = pathinfo($_FILES['guide_pdf']['name'], PATHINFO_EXTENSION);
+            $newPdfName = 'panduan_' . time() . '.' . $ext;
+
+            if (move_uploaded_file($_FILES['guide_pdf']['tmp_name'], '../uploads/' . $newPdfName)) {
+                $guide_sql = ", guide_path = ?";
+                $params[] = $newPdfName;
+            }
+        } else {
+            $msg = "<div class='alert alert-danger'>Format panduan hanya boleh PDF.</div>";
+        }
+    }
+
     if (empty($msg)) {
         try {
-            $updateQuery = "UPDATE settings SET site_name=?, instansi_name=?, instansi_address=?, instansi_contact=? $logo_sql WHERE id=1";
+            $updateQuery = "UPDATE settings SET site_name=?, instansi_name=?, instansi_address=?, instansi_contact=? $logo_sql $guide_sql WHERE id=1";
             $stmt = $pdo->prepare($updateQuery);
             $stmt->execute($params);
 
@@ -118,6 +136,19 @@ require_once 'layouts/sidebar.php';
                                 <input type="file" name="logo" class="form-control shadow-sm" accept="image/png, image/jpeg">
                                 <small class="text-muted mt-1 d-block"><i class="fas fa-info-circle me-1"></i> Biarkan kosong jika tidak ingin mengubah logo. Disarankan gambar PNG transparan.</small>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4 bg-light p-3 rounded border">
+                        <label class="form-label fw-bold text-success"><i class="fas fa-file-pdf me-2"></i> Panduan Penggunaan Sistem (PDF)</label>
+                        <div class="mt-2">
+                            <?php if(!empty($setting['guide_path'])): ?>
+                                <div class="mb-2">
+                                    <a href="../uploads/<?php echo $setting['guide_path']; ?>" target="_blank" class="btn btn-sm btn-outline-success"><i class="fas fa-eye me-1"></i> Lihat Panduan Saat Ini</a>
+                                </div>
+                            <?php endif; ?>
+                            <input type="file" name="guide_pdf" class="form-control shadow-sm" accept="application/pdf">
+                            <small class="text-muted mt-1 d-block"><i class="fas fa-info-circle me-1"></i> Unggah file PDF panduan penggunaan. Biarkan kosong jika tidak ingin mengubah panduan saat ini.</small>
                         </div>
                     </div>
 

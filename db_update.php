@@ -46,6 +46,10 @@ try {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
 
+    if (!columnExists($pdo, 'settings', 'guide_path')) {
+        $pdo->exec("ALTER TABLE settings ADD COLUMN guide_path VARCHAR(255) NULL");
+    }
+
     echo "Database updated successfully.\n";
 } catch (PDOException $e) {
     echo "Error updating database: " . $e->getMessage() . "\n";
