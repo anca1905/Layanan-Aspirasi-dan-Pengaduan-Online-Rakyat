@@ -20,10 +20,38 @@
         }
 
         .sidebar {
-            min-height: 100vh;
+            width: 250px;
+            min-width: 250px;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            overflow-y: auto;
             background-color: var(--primary-color);
             color: white;
             box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+            z-index: 1000;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .flex-grow-1 {
+            min-width: 0;
         }
 
         .sidebar a {
