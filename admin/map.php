@@ -43,10 +43,20 @@ require_once 'layouts/sidebar.php';
         
         <script>
             // Set default view to Kabupaten Bombana (approx coordinates)
-            var map = L.map('map').setView([-4.7667, 121.9667], 10);
+            var bombanaBounds = L.latLngBounds(
+                [-5.4, 121.2], // Southwest
+                [-4.2, 122.4]  // Northeast
+            );
+
+            var map = L.map('map', {
+                maxBounds: bombanaBounds,
+                maxBoundsViscosity: 1.0,
+                minZoom: 9
+            }).setView([-4.7667, 121.9667], 10);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
+                attribution: '&copy; OpenStreetMap contributors',
+                bounds: bombanaBounds
             }).addTo(map);
 
             var reportsData = <?php echo json_encode($reports); ?>;

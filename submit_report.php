@@ -398,32 +398,53 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         let marker;
         let miniMap;
         let miniMarker;
-        let defaultLat = -4.7573; // Koordinat default Bombana
-        let defaultLng = 121.9845;
+        let defaultLat = -4.7667; // Koordinat default Bombana
+        let defaultLng = 121.9667;
+
+        let bombanaBounds = L.latLngBounds(
+            [-5.4, 121.2], // Southwest (Selatan Barat)
+            [-4.2, 122.4]  // Northeast (Utara Timur)
+        );
 
         document.getElementById('mapModal').addEventListener('shown.bs.modal', function () {
             let currentLat = parseFloat(document.getElementById('lat').value) || defaultLat;
             let currentLng = parseFloat(document.getElementById('lng').value) || defaultLng;
 
             if (!map) {
-                map = L.map('map').setView([currentLat, currentLng], 13);
+                map = L.map('map', {
+                    maxBounds: bombanaBounds,
+                    maxBoundsViscosity: 1.0,
+                    minZoom: 9
+                }).setView([currentLat, currentLng], 11);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
+                    attribution: '© OpenStreetMap contributors',
+                    bounds: bombanaBounds
                 }).addTo(map);
 
                 marker = L.marker([currentLat, currentLng], {draggable: true}).addTo(map);
 
                 marker.on('dragend', function(e) {
                     let position = marker.getLatLng();
-                    map.panTo(position);
+                    // Clamp marker to bounds if dragged outside
+                    if (!bombanaBounds.contains(position)) {
+                        marker.setLatLng([defaultLat, defaultLng]);
+                        map.panTo([defaultLat, defaultLng]);
+                        alert("Lokasi tidak valid! Harap pilih lokasi di dalam wilayah Kabupaten Bombana.");
+                    } else {
+                        map.panTo(position);
+                    }
                 });
 
                 map.on('click', function(e) {
-                    marker.setLatLng(e.latlng);
-                    map.panTo(e.latlng);
+                    if (!bombanaBounds.contains(e.latlng)) {
+                        alert("Lokasi tidak valid! Harap pilih lokasi di dalam wilayah Kabupaten Bombana.");
+                    } else {
+                        marker.setLatLng(e.latlng);
+                        map.panTo(e.latlng);
+                    }
                 });
             } else {
-                map.setView([currentLat, currentLng], 13);
+                map.setView([currentLat, currentLng], 11);
                 marker.setLatLng([currentLat, currentLng]);
                 map.invalidateSize();
             }
@@ -435,6 +456,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         });
 
         function updateLocationData(lat, lng) {
+            let loc = L.latLng(lat, lng);
+            if (typeof bombanaBounds !== 'undefined' && !bombanaBounds.contains(loc)) {
+                alert("Lokasi yang terdeteksi berada di luar wilayah Kabupaten Bombana. Menggunakan koordinat default wilayah Bombana.");
+                lat = defaultLat;
+                lng = defaultLng;
+            }
+
             document.getElementById('lat').value = lat;
             document.getElementById('lng').value = lng;
             
