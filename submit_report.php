@@ -279,20 +279,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="mapModalLabel"><i class="fas fa-map-marked-alt text-danger me-2"></i>Pilih Titik Lokasi</h5>
+            <h5 class="modal-title" id="mapModalLabel"><i class="fas fa-map-marked-alt text-danger me-2"></i>Pilih Titik Lokasi - Kabupaten Bombana</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body p-0">
-            <div id="map" style="height: 400px; width: 100%; z-index: 10;"></div>
-            <div class="p-3 bg-light text-center small text-muted">Geser pin merah atau klik pada peta untuk menentukan lokasi yang tepat.</div>
+            <div id="map" style="height: 420px; width: 100%; z-index: 10;"></div>
+            <div class="p-2 bg-warning-subtle border-top text-center small">
+              <i class="fas fa-info-circle text-warning me-1"></i>
+              Klik atau geser pin <strong>hanya di dalam wilayah Kabupaten Bombana</strong>. Kecamatan & Desa akan terisi otomatis.
+            </div>
+            <div id="mapStatusInfo" class="px-3 py-2 text-center small fw-bold" style="min-height:32px;"></div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-            <button type="button" class="btn btn-primary" id="btnSaveMap" data-bs-dismiss="modal">Simpan Lokasi</button>
+            <button type="button" class="btn btn-primary" id="btnSaveMap">
+              <i class="fas fa-check-circle me-1"></i> Simpan Lokasi
+            </button>
           </div>
         </div>
       </div>
     </div>
+
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
@@ -419,168 +426,151 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         let miniMarker;
         let defaultLat = -4.7667; // Koordinat default Bombana (Kasipute)
         let defaultLng = 121.9667;
-        let isReverseGeocoding = false; // flag agar tidak double-request
+        let lastValidLat = defaultLat; // Simpan posisi valid terakhir
+        let lastValidLng = defaultLng;
+        let isReverseGeocoding = false;
+        let pendingMapLat = null; // Koordinat yg dipilih di modal (belum disimpan)
+        let pendingMapLng = null;
 
+        // Batas ketat wilayah Kabupaten Bombana
         let bombanaBounds = L.latLngBounds(
-            [-5.4, 121.2], // Southwest (Selatan Barat)
-            [-4.2, 122.4]  // Northeast (Utara Timur)
+            [-5.4, 121.2], // Southwest
+            [-4.2, 122.4]  // Northeast
         );
 
-        // ===== KECAMATAN & DESA DATA =====
-        // Simpan daftar districts agar bisa dipakai saat reverse-geocode
+        // ===== KECAMATAN & DESA =====
         let districtsData = [];
-
         const selectKecamatan = document.getElementById('kecamatan');
         const selectDesa = document.getElementById('desa');
 
-        // Muat Kecamatan untuk Kabupaten Bombana (ID: 7406)
         fetch('api_wilayah.php?type=districts&id=7406')
-            .then(response => response.json())
+            .then(r => r.json())
             .then(districts => {
                 districtsData = districts;
-                districts.forEach(district => {
-                    let option = document.createElement('option');
-                    option.setAttribute('data-id', district.id);
-                    option.value = district.name;
-                    option.textContent = district.name;
-                    selectKecamatan.appendChild(option);
+                districts.forEach(d => {
+                    let opt = document.createElement('option');
+                    opt.setAttribute('data-id', d.id);
+                    opt.value = d.name;
+                    opt.textContent = d.name;
+                    selectKecamatan.appendChild(opt);
                 });
             })
-            .catch(error => console.error('Error memuat data kecamatan:', error));
+            .catch(e => console.error('Error kecamatan:', e));
 
-        // Saat Kecamatan berubah (manual oleh pengguna), muat daftar Desa
         selectKecamatan.addEventListener('change', function() {
-            let selectedOption = this.options[this.selectedIndex];
-            let districtId = selectedOption.getAttribute('data-id');
-
+            let districtId = this.options[this.selectedIndex].getAttribute('data-id');
             selectDesa.innerHTML = '<option value="">-- Sedang Memuat... --</option>';
-
-            if (districtId) {
-                loadVillages(districtId, null);
-            } else {
-                selectDesa.innerHTML = '<option value="">-- Pilih Desa / Kelurahan --</option>';
-            }
+            if (districtId) loadVillages(districtId, null);
+            else selectDesa.innerHTML = '<option value="">-- Pilih Desa / Kelurahan --</option>';
         });
 
-        // Fungsi load desa; jika autoSelectDesa disediakan, otomatis pilih desa tsb
         function loadVillages(districtId, autoSelectDesa) {
             fetch(`api_wilayah.php?type=villages&id=${districtId}`)
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(villages => {
                     selectDesa.innerHTML = '<option value="">-- Pilih Desa / Kelurahan --</option>';
-                    villages.forEach(village => {
-                        let option = document.createElement('option');
-                        option.value = village.name;
-                        option.textContent = village.name;
-                        selectDesa.appendChild(option);
+                    villages.forEach(v => {
+                        let opt = document.createElement('option');
+                        opt.value = v.name;
+                        opt.textContent = v.name;
+                        selectDesa.appendChild(opt);
                     });
-
-                    // Auto-select desa jika diminta (dari reverse-geocode)
-                    if (autoSelectDesa) {
-                        autoSelectOption(selectDesa, autoSelectDesa);
-                    }
+                    if (autoSelectDesa) fuzzySelectOption(selectDesa, autoSelectDesa);
                 })
-                .catch(error => {
-                    console.error('Error memuat data desa:', error);
+                .catch(e => {
+                    console.error('Error desa:', e);
                     selectDesa.innerHTML = '<option value="">-- Gagal memuat data --</option>';
                 });
         }
 
-        // Fungsi memilih option yang paling mirip (fuzzy match)
-        function autoSelectOption(selectEl, targetName) {
+        // Fuzzy match: pilih option paling mirip dengan targetName
+        function fuzzySelectOption(selectEl, targetName) {
             if (!targetName) return;
-            let targetLower = targetName.toLowerCase();
-            let bestMatch = null;
-            let bestScore = 0;
+            let tLow = targetName.toLowerCase();
+            let best = null, bestScore = 0;
             for (let opt of selectEl.options) {
                 if (!opt.value) continue;
-                let optLower = opt.value.toLowerCase();
-                // Cek apakah nama target mengandung nama option atau sebaliknya
+                let oLow = opt.value.toLowerCase();
                 let score = 0;
-                if (optLower === targetLower) score = 100;
-                else if (targetLower.includes(optLower)) score = 80;
-                else if (optLower.includes(targetLower)) score = 70;
+                if (oLow === tLow) score = 100;
+                else if (tLow.includes(oLow)) score = 80;
+                else if (oLow.includes(tLow)) score = 70;
                 else {
-                    // Hitung kata-kata yang cocok
-                    let targetWords = targetLower.split(/\s+/);
-                    let optWords = optLower.split(/\s+/);
-                    let matches = targetWords.filter(w => optWords.some(o => o.includes(w) || w.includes(o)));
-                    score = (matches.length / Math.max(targetWords.length, optWords.length)) * 60;
+                    let tw = tLow.split(/\s+/), ow = oLow.split(/\s+/);
+                    let m = tw.filter(w => ow.some(o => o.includes(w) || w.includes(o)));
+                    score = (m.length / Math.max(tw.length, ow.length)) * 60;
                 }
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestMatch = opt;
-                }
+                if (score > bestScore) { bestScore = score; best = opt; }
             }
-            if (bestMatch && bestScore > 30) {
-                bestMatch.selected = true;
-            }
+            if (best && bestScore > 30) best.selected = true;
         }
 
-        // ===== REVERSE GEOCODING dari koordinat =====
-        // Panggil Nominatim untuk dapatkan nama kecamatan & desa dari lat/lng
-        function reverseGeocodeAndFill(lat, lng) {
+        // Cari option kecamatan paling cocok, return {option, districtId} atau null
+        function fuzzyMatchKecamatan(targetName) {
+            if (!targetName) return null;
+            let tLow = targetName.toLowerCase();
+            let best = null, bestScore = 0;
+            for (let opt of selectKecamatan.options) {
+                if (!opt.value) continue;
+                let oLow = opt.value.toLowerCase();
+                let score = 0;
+                if (oLow === tLow) score = 100;
+                else if (tLow.includes(oLow)) score = 80;
+                else if (oLow.includes(tLow)) score = 70;
+                else {
+                    let tw = tLow.split(/\s+/), ow = oLow.split(/\s+/);
+                    let m = tw.filter(w => ow.some(o => o.includes(w) || w.includes(o)));
+                    score = (m.length / Math.max(tw.length, ow.length)) * 60;
+                }
+                if (score > bestScore) { bestScore = score; best = opt; }
+            }
+            return (best && bestScore > 30) ? best : null;
+        }
+
+        // ===== REVERSE GEOCODING =====
+        function reverseGeocodeAndFill(lat, lng, statusElId) {
             if (isReverseGeocoding) return;
             isReverseGeocoding = true;
-            document.getElementById('lokasiStatus').innerHTML += ' <span class="text-info small"><i class="fas fa-spinner fa-spin me-1"></i>Mengisi kecamatan & desa otomatis...</span>';
+
+            let statusEl = document.getElementById(statusElId || 'lokasiStatus');
+            let origText = statusEl.innerHTML;
+            statusEl.innerHTML = origText + ' <span class="text-info small"><i class="fas fa-spinner fa-spin me-1"></i>Mencari kecamatan & desa...</span>';
 
             fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=id`)
                 .then(r => r.json())
                 .then(data => {
                     isReverseGeocoding = false;
-                    if (!data || !data.address) return;
-
-                    let addr = data.address;
-                    // Nominatim mungkin menggunakan county, city, town, village, suburb
-                    let kecamatanRaw = addr.county || addr.city_district || addr.suburb || '';
-                    let desaRaw = addr.village || addr.hamlet || addr.town || addr.suburb || addr.neighbourhood || '';
-
-                    // Bersihkan prefiks "Kecamatan" jika ada
-                    kecamatanRaw = kecamatanRaw.replace(/^Kecamatan\s+/i, '').trim();
-                    desaRaw = desaRaw.replace(/^Desa\s+|^Kelurahan\s+/i, '').trim();
-
-                    if (kecamatanRaw) {
-                        // Cari match di dropdown kecamatan
-                        let matchedOption = null;
-                        let bestScore = 0;
-                        for (let opt of selectKecamatan.options) {
-                            if (!opt.value) continue;
-                            let optLower = opt.value.toLowerCase();
-                            let targetLower = kecamatanRaw.toLowerCase();
-                            let score = 0;
-                            if (optLower === targetLower) score = 100;
-                            else if (targetLower.includes(optLower)) score = 80;
-                            else if (optLower.includes(targetLower)) score = 70;
-                            else {
-                                let targetWords = targetLower.split(/\s+/);
-                                let optWords = optLower.split(/\s+/);
-                                let matches = targetWords.filter(w => optWords.some(o => o.includes(w) || w.includes(o)));
-                                score = (matches.length / Math.max(targetWords.length, optWords.length)) * 60;
-                            }
-                            if (score > bestScore) {
-                                bestScore = score;
-                                matchedOption = opt;
-                            }
-                        }
-
-                        if (matchedOption && bestScore > 30) {
-                            matchedOption.selected = true;
-                            let districtId = matchedOption.getAttribute('data-id');
-                            // Muat desa sesuai kecamatan, lalu auto-select desa
-                            if (districtId) {
-                                loadVillages(districtId, desaRaw);
-                            }
-                        }
+                    if (!data || !data.address) {
+                        statusEl.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i> Koordinat: ${lat.toFixed(6)}, ${lng.toFixed(6)}</span>`;
+                        return;
                     }
 
-                    // Update status
-                    let statusEl = document.getElementById('lokasiStatus');
-                    let kecFilled = selectKecamatan.value ? `Kecamatan: <strong>${selectKecamatan.value}</strong>` : '';
-                    statusEl.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i> Koordinat tersimpan. ${kecFilled}</span>`;
+                    let addr = data.address;
+                    // Nominatim: county = kecamatan, village/hamlet/suburb = desa
+                    let kecRaw = (addr.county || addr.city_district || addr.suburb || '').replace(/^Kecamatan\s+/i, '').trim();
+                    let desaRaw = (addr.village || addr.hamlet || addr.town || addr.suburb || addr.neighbourhood || '').replace(/^Desa\s+|^Kelurahan\s+/i, '').trim();
+
+                    let matchedKec = fuzzyMatchKecamatan(kecRaw);
+                    if (matchedKec) {
+                        matchedKec.selected = true;
+                        let districtId = matchedKec.getAttribute('data-id');
+                        if (districtId) loadVillages(districtId, desaRaw);
+                    }
+
+                    let kecInfo = matchedKec ? ` | Kec: <strong>${matchedKec.value}</strong>` : '';
+                    statusEl.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i> Koordinat: ${lat.toFixed(6)}, ${lng.toFixed(6)}${kecInfo}</span>`;
+
+                    // Juga update mapStatusInfo jika ada
+                    let mapStatus = document.getElementById('mapStatusInfo');
+                    if (mapStatus) {
+                        let desaInfo = desaRaw ? `, Desa: <strong>${desaRaw}</strong>` : '';
+                        mapStatus.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i> Kec: <strong>${matchedKec ? matchedKec.value : kecRaw || '-'}</strong>${desaInfo}</span>`;
+                    }
                 })
                 .catch(err => {
                     isReverseGeocoding = false;
                     console.error('Reverse geocode error:', err);
+                    statusEl.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i> Koordinat: ${lat.toFixed(6)}, ${lng.toFixed(6)}</span>`;
                 });
         }
 
@@ -588,6 +578,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         document.getElementById('mapModal').addEventListener('shown.bs.modal', function () {
             let currentLat = parseFloat(document.getElementById('lat').value) || defaultLat;
             let currentLng = parseFloat(document.getElementById('lng').value) || defaultLng;
+
+            // Set pending ke posisi saat ini
+            pendingMapLat = currentLat;
+            pendingMapLng = currentLng;
+            lastValidLat = currentLat;
+            lastValidLng = currentLng;
+
+            let mapStatus = document.getElementById('mapStatusInfo');
+            if (mapStatus) mapStatus.innerHTML = '<span class="text-muted small">Klik atau geser pin untuk memilih lokasi.</span>';
 
             if (!map) {
                 map = L.map('map', {
@@ -597,35 +596,91 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }).setView([currentLat, currentLng], 11);
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors',
-                    bounds: bombanaBounds
+                    attribution: '© OpenStreetMap contributors'
                 }).addTo(map);
 
-                marker = L.marker([currentLat, currentLng], {draggable: true}).addTo(map);
+                // Overlay merah tipis di luar batas Bombana (visual hint)
+                // Kotak luar besar
+                let outer = [[-90, -180], [-90, 180], [90, 180], [90, -180]];
+                // Kotak dalam = batas Bombana (lubang)
+                let inner = [
+                    [-5.4, 121.2], [-5.4, 122.4], [-4.2, 122.4], [-4.2, 121.2]
+                ];
+                L.polygon([outer, inner], {
+                    color: 'none',
+                    fillColor: '#ff0000',
+                    fillOpacity: 0.18,
+                    interactive: false
+                }).addTo(map);
 
-                marker.on('dragend', function(e) {
-                    let position = marker.getLatLng();
-                    if (!bombanaBounds.contains(position)) {
-                        marker.setLatLng([defaultLat, defaultLng]);
-                        map.panTo([defaultLat, defaultLng]);
-                        alert("Lokasi tidak valid! Harap pilih lokasi di dalam wilayah Kabupaten Bombana.");
-                    } else {
-                        map.panTo(position);
-                        // Auto-fill kecamatan & desa saat pin digeser
-                        updateLocationData(position.lat, position.lng, true);
+                // Garis batas Bombana
+                L.rectangle(bombanaBounds, {
+                    color: '#dc3545',
+                    weight: 2,
+                    fill: false,
+                    dashArray: '6 4',
+                    interactive: false
+                }).addTo(map);
+
+                // Custom icon merah untuk marker
+                let redIcon = L.divIcon({
+                    html: '<i class="fas fa-map-marker-alt" style="color:#dc3545; font-size:32px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.4));"></i>',
+                    className: '',
+                    iconSize: [32, 40],
+                    iconAnchor: [16, 40]
+                });
+
+                marker = L.marker([currentLat, currentLng], {
+                    draggable: true,
+                    icon: redIcon
+                }).addTo(map);
+
+                // Saat sedang drag — clamp ke batas secara real-time
+                marker.on('drag', function(e) {
+                    let pos = marker.getLatLng();
+                    if (!bombanaBounds.contains(pos)) {
+                        // Clamp ke batas terdekat
+                        let lat = Math.max(-5.4, Math.min(-4.2, pos.lat));
+                        let lng = Math.max(121.2, Math.min(122.4, pos.lng));
+                        marker.setLatLng([lat, lng]);
                     }
                 });
 
+                // Saat drag selesai — validasi final dan update status
+                marker.on('dragend', function(e) {
+                    let pos = marker.getLatLng();
+                    if (!bombanaBounds.contains(pos)) {
+                        // Kembalikan ke posisi valid terakhir
+                        marker.setLatLng([lastValidLat, lastValidLng]);
+                        map.panTo([lastValidLat, lastValidLng]);
+                        setMapStatus('<span class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i> Di luar wilayah Bombana! Pin dikembalikan.</span>');
+                    } else {
+                        lastValidLat = pos.lat;
+                        lastValidLng = pos.lng;
+                        pendingMapLat = pos.lat;
+                        pendingMapLng = pos.lng;
+                        map.panTo(pos);
+                        setMapStatus('<span class="text-info"><i class="fas fa-spinner fa-spin me-1"></i> Mengidentifikasi lokasi...</span>');
+                        reverseGeocodeAndFill(pos.lat, pos.lng, 'mapStatusInfo');
+                    }
+                });
+
+                // Klik peta untuk pindah marker
                 map.on('click', function(e) {
                     if (!bombanaBounds.contains(e.latlng)) {
-                        alert("Lokasi tidak valid! Harap pilih lokasi di dalam wilayah Kabupaten Bombana.");
-                    } else {
-                        marker.setLatLng(e.latlng);
-                        map.panTo(e.latlng);
-                        // Auto-fill kecamatan & desa saat klik peta
-                        updateLocationData(e.latlng.lat, e.latlng.lng, true);
+                        setMapStatus('<span class="text-danger"><i class="fas fa-ban me-1"></i> Lokasi di luar wilayah Kabupaten Bombana!</span>');
+                        return;
                     }
+                    marker.setLatLng(e.latlng);
+                    map.panTo(e.latlng);
+                    lastValidLat = e.latlng.lat;
+                    lastValidLng = e.latlng.lng;
+                    pendingMapLat = e.latlng.lat;
+                    pendingMapLng = e.latlng.lng;
+                    setMapStatus('<span class="text-info"><i class="fas fa-spinner fa-spin me-1"></i> Mengidentifikasi lokasi...</span>');
+                    reverseGeocodeAndFill(e.latlng.lat, e.latlng.lng, 'mapStatusInfo');
                 });
+
             } else {
                 map.setView([currentLat, currentLng], 11);
                 marker.setLatLng([currentLat, currentLng]);
@@ -633,25 +688,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         });
 
-        // Saat tombol Simpan Lokasi diklik di modal peta
+        function setMapStatus(html) {
+            let el = document.getElementById('mapStatusInfo');
+            if (el) el.innerHTML = html;
+        }
+
+        // Tombol Simpan Lokasi — validasi dulu, baru tutup modal
         document.getElementById('btnSaveMap').addEventListener('click', function() {
-            let position = marker.getLatLng();
-            updateLocationData(position.lat, position.lng, true);
+            if (pendingMapLat === null || pendingMapLng === null) {
+                setMapStatus('<span class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i> Belum ada lokasi dipilih. Klik pada peta terlebih dahulu!</span>');
+                return;
+            }
+            if (!bombanaBounds.contains(L.latLng(pendingMapLat, pendingMapLng))) {
+                setMapStatus('<span class="text-danger"><i class="fas fa-ban me-1"></i> Lokasi tidak valid! Pilih lokasi di dalam wilayah Bombana.</span>');
+                return;
+            }
+            // Simpan dan tutup modal
+            updateLocationData(pendingMapLat, pendingMapLng, false); // sudah reverse-geocode sebelumnya
+            let modal = bootstrap.Modal.getInstance(document.getElementById('mapModal'));
+            if (modal) modal.hide();
         });
 
         // ===== UPDATE LOKASI DATA + MINI MAP =====
         function updateLocationData(lat, lng, doReverseGeocode) {
-            let loc = L.latLng(lat, lng);
-            if (!bombanaBounds.contains(loc)) {
-                alert("Lokasi yang terdeteksi berada di luar wilayah Kabupaten Bombana. Menggunakan koordinat default.");
-                lat = defaultLat;
-                lng = defaultLng;
+            // Validasi bounds
+            if (!bombanaBounds.contains(L.latLng(lat, lng))) {
+                alert("Lokasi berada di luar wilayah Kabupaten Bombana. Tidak dapat disimpan.");
+                return;
             }
 
             document.getElementById('lat').value = lat;
             document.getElementById('lng').value = lng;
 
-            document.getElementById('lokasiStatus').innerHTML = '<span class="text-success"><i class="fas fa-check-circle me-1"></i> Koordinat: ' + lat.toFixed(6) + ', ' + lng.toFixed(6) + '</span>';
+            document.getElementById('lokasiStatus').innerHTML =
+                '<span class="text-success"><i class="fas fa-check-circle me-1"></i> Koordinat: ' +
+                parseFloat(lat).toFixed(6) + ', ' + parseFloat(lng).toFixed(6) + '</span>';
 
             // Update mini map
             let miniMapContainer = document.getElementById('miniMapContainer');
@@ -659,10 +730,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             if (!miniMap) {
                 miniMap = L.map('miniMapContainer', {
-                    zoomControl: false,
-                    dragging: false,
-                    scrollWheelZoom: false,
-                    doubleClickZoom: false
+                    zoomControl: false, dragging: false,
+                    scrollWheelZoom: false, doubleClickZoom: false
                 }).setView([lat, lng], 15);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(miniMap);
                 miniMarker = L.marker([lat, lng]).addTo(miniMap);
@@ -672,50 +741,50 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 miniMap.invalidateSize();
             }
 
-            // Reverse geocode untuk isi kecamatan & desa otomatis
             if (doReverseGeocode) {
-                reverseGeocodeAndFill(lat, lng);
+                reverseGeocodeAndFill(lat, lng, 'lokasiStatus');
             }
         }
 
-        // ===== DETEKSI LOKASI SAAT INI (GPS) =====
+        // ===== DETEKSI LOKASI GPS =====
         document.getElementById('btnLokasi').addEventListener('click', function() {
-            var btn = this;
+            let btn = this;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Sedang mencari lokasi...';
             btn.disabled = true;
 
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    let lat = position.coords.latitude;
-                    let lng = position.coords.longitude;
+            if (!navigator.geolocation) {
+                alert("Browser Anda tidak mendukung fitur deteksi lokasi.");
+                btn.disabled = false;
+                return;
+            }
 
-                    // Cek apakah koordinat GPS ada di dalam Bombana
-                    if (!bombanaBounds.contains(L.latLng(lat, lng))) {
-                        btn.classList.add('btn-warning');
-                        btn.innerHTML = '<i class="fas fa-location-arrow me-2"></i> Coba Deteksi Lagi';
-                        btn.disabled = false;
-                        alert("Lokasi Anda saat ini berada di luar wilayah Kabupaten Bombana. Harap pilih lokasi secara manual melalui peta.");
-                        return;
-                    }
+            navigator.geolocation.getCurrentPosition(function(pos) {
+                let lat = pos.coords.latitude;
+                let lng = pos.coords.longitude;
 
-                    btn.classList.remove('btn-warning');
-                    btn.classList.add('btn-success');
-                    btn.innerHTML = '<i class="fas fa-check-circle me-2"></i> Lokasi Berhasil Ditemukan!';
-
-                    updateLocationData(lat, lng, true);
-
-                }, function(error) {
+                if (!bombanaBounds.contains(L.latLng(lat, lng))) {
+                    btn.className = btn.className.replace('btn-success', 'btn-warning');
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-warning');
                     btn.innerHTML = '<i class="fas fa-location-arrow me-2"></i> Coba Deteksi Lagi';
                     btn.disabled = false;
-                    alert("Gagal mendeteksi lokasi. Pastikan GPS/Location Anda aktif dan berikan izin pada browser.");
-                }, {
-                    enableHighAccuracy: true
-                });
-            } else {
-                alert("Browser Anda tidak mendukung fitur deteksi lokasi.");
-            }
+                    alert("Lokasi GPS Anda saat ini berada di luar wilayah Kabupaten Bombana.\nGunakan tombol 'Pilih dari Peta' untuk memilih lokasi secara manual.");
+                    return;
+                }
+
+                btn.classList.remove('btn-warning');
+                btn.classList.add('btn-success');
+                btn.innerHTML = '<i class="fas fa-check-circle me-2"></i> Lokasi Berhasil Ditemukan!';
+                updateLocationData(lat, lng, true);
+
+            }, function(err) {
+                btn.innerHTML = '<i class="fas fa-location-arrow me-2"></i> Coba Deteksi Lagi';
+                btn.disabled = false;
+                alert("Gagal mendeteksi lokasi. Pastikan GPS/Location aktif dan izin diberikan ke browser.");
+            }, { enableHighAccuracy: true });
         });
     </script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
