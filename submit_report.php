@@ -148,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <img src="assets/img/logo_bombana.png" alt="Logo Bombana">
                 <div>
                     <div>PEMERINTAH KABUPATEN BOMBANA</div>
-                    <div style="font-size: 0.75rem; color: #DAA520; font-weight: 500;">Layanan Pengaduan Terpadu</div>
+                    
                 </div>
             </a>
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -182,7 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <?php if (empty($message) || strpos($message, 'alert-danger') !== false): ?>
                     <div class="card shadow-lg border-0" style="border-top: 5px solid var(--primary-color) !important;">
                         <div class="card-header bg-white pt-4 pb-0 border-0 text-center">
-                            <h3 class="fw-bold" style="color: var(--primary-color);">Formulir Pengaduan Infrastruktur</h3>
+                            <h3 class="fw-bold" style="color: var(--primary-color);">Formulir Pelaporan Infrastruktur</h3>
                             <p class="text-muted">Lengkapi data di bawah ini. Titik lokasi Anda akan dideteksi secara otomatis.</p>
                         </div>
                         <div class="card-body p-4 p-md-5">
@@ -209,6 +209,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                                     <div id="lokasiStatus" class="small fw-bold mt-2 mb-2"></div>
                                     <div id="miniMapContainer" style="height: 150px; display: none; border-radius: 8px; border: 1px solid #ccc; z-index: 1;"></div>
+                                    <div id="radiusWarning" class="mt-2"></div>
 
                                     <input type="hidden" name="latitude" id="lat">
                                     <input type="hidden" name="longitude" id="lng">
@@ -769,8 +770,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         });
 
         // ======================================
-        // MINI MAP
+        // MINI MAP & RADIUS CHECK
         // ======================================
+        function checkRadius(lat, lng) {
+            let warnEl = document.getElementById('radiusWarning');
+            if (!warnEl) return;
+            warnEl.innerHTML = '<span class="text-info small"><i class="fas fa-spinner fa-spin me-1"></i>Mengecek laporan di sekitarnya...</span>';
+            fetch(`api_check_radius.php?lat=${lat}&lng=${lng}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.found) {
+                        let html = `<div class="alert alert-warning py-2 mb-0 small border-start border-4 border-warning">
+                            <strong><i class="fas fa-exclamation-triangle me-1"></i> Informasi:</strong>
+                            Ada ${data.reports.length} laporan jalan rusak dalam radius 20 meter dari titik ini. 
+                            (Kode: ${data.reports.map(r => r.tracking_code).join(', ')}). 
+                            Anda tetap dapat mengirimkan laporan ini jika kondisinya berbeda.
+                        </div>`;
+                        warnEl.innerHTML = html;
+                    } else {
+                        warnEl.innerHTML = '';
+                    }
+                })
+                .catch(e => {
+                    console.error('Radius check error:', e);
+                    warnEl.innerHTML = '';
+                });
+        }
+
         function updateMiniMap(lat, lng) {
             let container = document.getElementById('miniMapContainer');
             container.style.display = 'block';
@@ -786,6 +812,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 miniMarker.setLatLng([lat, lng]);
                 miniMap.invalidateSize();
             }
+            
+            // Cek laporan terdekat
+            checkRadius(lat, lng);
         }
 
         // ======================================
@@ -852,3 +881,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </body>
 
 </html>
+

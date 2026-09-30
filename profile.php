@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <img src="assets/img/logo_bombana.png" alt="Logo Bombana">
                 <div>
                     <div>PEMERINTAH KABUPATEN BOMBANA</div>
-                    <div style="font-size: 0.75rem; color: #DAA520; font-weight: 500;">Layanan Pengaduan Terpadu</div>
+                    
                 </div>
             </a>
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
