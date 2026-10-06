@@ -23,25 +23,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $lng = isset($_POST['longitude']) && $_POST['longitude'] !== '' ? (float)$_POST['longitude'] : null;
 
     // ===== VALIDASI KOORDINAT WILAYAH BOMBANA (Server-Side) =====
-    // Batas wilayah Kabupaten Bombana: lat -5.4 s/d -4.2, lng 121.2 s/d 122.4
-    if ($lat !== null && $lng !== null) {
-        $BOMBANA_LAT_MIN = -5.4;
-        $BOMBANA_LAT_MAX = -4.2;
-        $BOMBANA_LNG_MIN = 121.2;
-        $BOMBANA_LNG_MAX = 122.4;
+    if ($lat === null || $lng === null) {
+        $message = "<div class='alert alert-danger border-start border-5 border-danger'>
+                        <h5 class='alert-heading fw-bold'><i class='fas fa-map-marker-alt me-2'></i>Koordinat Lokasi Wajib Diisi!</h5>
+                        <p class='mb-0'>Anda harus mendeteksi lokasi menggunakan GPS atau memilih titik dari peta sebelum mengirim laporan.</p>
+                    </div>";
+        goto end_post;
+    }
 
-        if ($lat < $BOMBANA_LAT_MIN || $lat > $BOMBANA_LAT_MAX ||
-            $lng < $BOMBANA_LNG_MIN || $lng > $BOMBANA_LNG_MAX) {
+    // Batas wilayah Kabupaten Bombana: lat -5.4 s/d -4.2, lng 121.2 s/d 122.4
+    $BOMBANA_LAT_MIN = -5.4;
+    $BOMBANA_LAT_MAX = -4.2;
+    $BOMBANA_LNG_MIN = 121.2;
+    $BOMBANA_LNG_MAX = 122.4;
+
+    if ($lat < $BOMBANA_LAT_MIN || $lat > $BOMBANA_LAT_MAX ||
+        $lng < $BOMBANA_LNG_MIN || $lng > $BOMBANA_LNG_MAX) {
             $message = "<div class='alert alert-danger border-start border-5 border-danger'>
                             <h5 class='alert-heading fw-bold'><i class='fas fa-exclamation-triangle me-2'></i>Lokasi Tidak Valid!</h5>
                             <p class='mb-0'>Koordinat yang Anda masukkan berada di luar wilayah Kabupaten Bombana. Laporan ini hanya dapat diajukan untuk lokasi di dalam Kabupaten Bombana.</p>
                         </div>";
             goto end_post;
         }
-    }
 
-    // Generate Tracking Code (Format: LPR-TahunBulanTanggal-Random)
-    $tracking_code = 'LPR-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
 
     // Handle File Upload (Foto Bukti)
     $foto = '';
@@ -195,7 +199,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <form action="" method="POST" enctype="multipart/form-data">
 
                                 <div class="mb-4 p-3 bg-light rounded border border-warning">
-                                    <label class="form-label fw-bold text-dark"><i class="fas fa-map-marker-alt text-danger me-2"></i>Titik Koordinat Lokasi Laporan (Opsional)</label>
+                                    <label class="form-label fw-bold text-dark"><i class="fas fa-map-marker-alt text-danger me-2"></i>Titik Koordinat Lokasi Laporan (Wajib)</label>
                                     <p class="small text-muted mb-2">Pilih lokasi melalui peta atau deteksi otomatis saat Anda berada di lokasi jalan yang rusak agar sistem dapat mencatat titik GPS secara akurat.</p>
 
                                     <div class="d-flex flex-column flex-md-row gap-2 mb-3">
@@ -744,6 +748,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 alert('Gagal mendeteksi lokasi GPS. Pastikan GPS aktif dan izin diberikan.');
             }, { enableHighAccuracy: true, timeout: 15000 });
         });
+        // ======================================
+        // FORM SUBMIT VALIDATION
+        // ======================================
+        document.querySelector('form').addEventListener('submit', function(e) {
+            let lat = document.getElementById('lat').value;
+            let lng = document.getElementById('lng').value;
+            if (!lat || !lng) {
+                e.preventDefault();
+                let statusEl = document.getElementById('lokasiStatus');
+                statusEl.innerHTML = '<span class="text-danger fw-bold"><i class="fas fa-exclamation-triangle me-1"></i> KOORDINAT LOKASI WAJIB DIISI! Silakan gunakan Deteksi GPS atau Pilih dari Peta terlebih dahulu.</span>';
+                statusEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
     </script>
 
 
@@ -751,4 +768,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </body>
 
 </html>
+
+
+
 
