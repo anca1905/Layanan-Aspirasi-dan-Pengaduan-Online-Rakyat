@@ -1,0 +1,112 @@
+{
+  "KABAENA": {
+    "lat": -5.2750713,
+    "lng": 121.8388013,
+    "defaultVillage": "Teomokole"
+  },
+  "KABAENA UTARA": {
+    "lat": -5.1995877,
+    "lng": 121.8829441,
+    "defaultVillage": "Tedubara"
+  },
+  "KABAENA SELATAN": {
+    "lat": -5.3241209,
+    "lng": 121.8392211,
+    "defaultVillage": "Batuawu"
+  },
+  "KABAENA BARAT": {
+    "lat": -5.2690735,
+    "lng": 121.8084269,
+    "defaultVillage": "Sikeli"
+  },
+  "KABAENA TIMUR": {
+    "lat": -5.3431883,
+    "lng": 122.0206817,
+    "defaultVillage": "Dongkala"
+  },
+  "KABAENA TENGAH": {
+    "lat": -5.1240469,
+    "lng": 121.9651537,
+    "defaultVillage": "Lengora"
+  },
+  "RUMBIA": {
+    "lat": -4.7776629,
+    "lng": 122.0195558,
+    "defaultVillage": "Kasipute"
+  },
+  "MATA OLEO": {
+    "lat": -4.8411,
+    "lng": 122.0178,
+    "defaultVillage": "Liano"
+  },
+  "KEP. MASALOKA RAYA": {
+    "lat": -4.8244064,
+    "lng": 122.1282942,
+    "defaultVillage": "Masaloka"
+  },
+  "RUMBIA TENGAH": {
+    "lat": -4.7756,
+    "lng": 122.049,
+    "defaultVillage": "Lauru"
+  },
+  "RAROWATU": {
+    "lat": -4.717,
+    "lng": 121.9374,
+    "defaultVillage": "Taubonto"
+  },
+  "RAROWATU UTARA": {
+    "lat": -4.6347346,
+    "lng": 122.0036455,
+    "defaultVillage": "Aneka Marga"
+  },
+  "LANTARI JAYA": {
+    "lat": -4.5983865,
+    "lng": 122.0326109,
+    "defaultVillage": "Lantari"
+  },
+  "POLEANG TIMUR": {
+    "lat": -4.8328,
+    "lng": 121.8053,
+    "defaultVillage": "Bambaea"
+  },
+  "POLEANG UTARA": {
+    "lat": -4.7197455,
+    "lng": 121.7524361,
+    "defaultVillage": "Toburi"
+  },
+  "POLEANG SELATAN": {
+    "lat": -4.8171448,
+    "lng": 121.7016722,
+    "defaultVillage": "Waemputang"
+  },
+  "POLEANG TENGGARA": {
+    "lat": -4.8872,
+    "lng": 121.9512,
+    "defaultVillage": "Lemo"
+  },
+  "POLEANG": {
+    "lat": -4.7819,
+    "lng": 121.5831,
+    "defaultVillage": "Boepinang"
+  },
+  "POLEANG BARAT": {
+    "lat": -4.6436355,
+    "lng": 121.5476111,
+    "defaultVillage": "Rakadua"
+  },
+  "TONTONUNU": {
+    "lat": -4.6807658,
+    "lng": 121.6616576,
+    "defaultVillage": "Tontonunu"
+  },
+  "POLEANG TENGAH": {
+    "lat": -4.7423,
+    "lng": 121.6541,
+    "defaultVillage": "Paria"
+  },
+  "MATA USU": {
+    "lat": -4.6167,
+    "lng": 121.7833,
+    "defaultVillage": "KOLOMBI MATA USU"
+  }
+}
