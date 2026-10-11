@@ -15,7 +15,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Layanan Pengaduan Masyarakat - Pemerintah Kabupaten Bombana</title>
+    <title>Layanan Pelaporan Masyarakat - Pemerintah Kabupaten Bombana</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
@@ -60,7 +60,7 @@ try {
             <div class="row justify-content-center">
                 <div class="col-lg-8">
                     <img src="assets/img/logo_bombana.png" alt="Logo" style="height: 100px; margin-bottom: 20px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));">
-                    <h1>Layanan Aspirasi dan Pengaduan Online Rakyat</h1>
+                    <h1>Layanan Aspirasi dan Pelaporan Online Rakyat</h1>
                     <p>Sampaikan laporan, aspirasi, dan keluhan Anda terkait pelayanan publik di lingkungan Pemerintah Kabupaten Bombana secara mudah, aman, dan transparan.</p>
                     <div class="d-flex flex-column flex-md-row gap-3 justify-content-center mt-4">
                         <a href="submit_report.php" class="btn btn-warning btn-lg shadow w-100 w-md-auto"><i class="fas fa-pen me-2"></i> Buat Laporan</a>
@@ -105,7 +105,7 @@ try {
                             <i class="fas fa-check-double fa-2x"></i>
                         </div>
                         <h5 class="fw-bold">3. Tindak Lanjut</h5>
-                        <p class="text-muted small">Instansi terkait akan menindaklanjuti dan menyelesaikan pengaduan Anda.</p>
+                        <p class="text-muted small">Instansi terkait akan menindaklanjuti dan menyelesaikan Pelaporan Anda.</p>
                     </div>
                 </div>
             </div>
@@ -135,7 +135,7 @@ try {
                 <div class="col-md-8">
                     <img src="assets/img/logo_bombana.png" alt="Logo" style="height: 60px; margin-bottom: 15px; opacity: 0.8;">
                     <h5>Pemerintah Kabupaten Bombana</h5>
-                    <p>Pusat Layanan Aspirasi dan Pengaduan Terpadu</p>
+                    <p>Pusat Layanan Aspirasi dan Pelaporan Terpadu</p>
                     <hr>
                     <p>&copy; <?php echo date("Y"); ?> <strong class="text-gold">Pemkab Bombana</strong>. Semua Hak Dilindungi Undang-Undang.</p>
                 </div>
