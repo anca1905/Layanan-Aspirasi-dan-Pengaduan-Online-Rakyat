@@ -79,6 +79,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         goto end_post;
     }
 
+    // Generate Tracking Code (Format: LPR-TahunBulanTanggal-Random)
+    $tracking_code = 'LPR-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
+
+    // Bersihkan entri korup tracking_code kosong di database jika pernah ada
+    try {
+        $pdo->exec("UPDATE reports SET tracking_code = CONCAT('LPR-FIX-', id) WHERE tracking_code = '' OR tracking_code IS NULL");
+    } catch (\Exception $e) {}
 
     // Handle File Upload (Foto Bukti)
     $foto = '';
