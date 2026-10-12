@@ -18,7 +18,7 @@ try {
     $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port       = 587;
     
-    $mail->setFrom('noreply@bombanakab.go.id', 'Sistem Pengaduan Bombana');
+    $mail->setFrom('noreply@bombanakab.go.id', 'Sistem Pelaporan Bombana');
     $mail->addAddress('test@example.com');
     $mail->Subject = 'Test Email';
     $mail->Body    = 'Test email body';

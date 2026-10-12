@@ -191,7 +191,7 @@ function getStatusBadge($status) {
                                     <h6 class="fw-bold"><i class="fas fa-calendar-alt me-2 text-primary"></i><?php echo date('d F Y, H:i', strtotime($report_detail['created_at'])); ?></h6>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <p class="text-muted small mb-1">Kategori Pengaduan</p>
+                                    <p class="text-muted small mb-1">Kategori Pelaporan</p>
                                     <h6 class="fw-bold"><i class="fas fa-tag me-2 text-warning"></i><?php echo htmlspecialchars($report_detail['severity']); ?></h6>
                                 </div>
                                 <div class="col-md-6 mb-3">
@@ -311,7 +311,7 @@ function getStatusBadge($status) {
                         <div class="card-header bg-white pt-4 pb-3 border-0 d-flex justify-content-between align-items-center flex-wrap">
                             <div class="mb-3 mb-md-0">
                                 <h3 class="fw-bold mb-0" style="color: var(--primary-color);"><i class="fas fa-history me-2"></i>Riwayat Laporan</h3>
-                                <p class="text-muted small mb-0 mt-1">Daftar seluruh laporan pengaduan masyarakat yang telah masuk.</p>
+                                <p class="text-muted small mb-0 mt-1">Daftar seluruh laporan Pelaporan masyarakat yang telah masuk.</p>
                             </div>
                             <div class="d-flex flex-wrap gap-2 align-items-center">
                                 <form action="track.php" method="GET" class="d-flex shadow-sm rounded">
@@ -360,7 +360,7 @@ function getStatusBadge($status) {
                                                 <td colspan="6" class="py-5 text-center text-muted">
                                                     <i class="fas fa-folder-open fa-4x mb-3 opacity-25"></i>
                                                     <h5 class="fw-bold text-secondary">Belum Ada Riwayat</h5>
-                                                    <p class="mb-0">Belum ada laporan pengaduan yang masuk ke sistem.</p>
+                                                    <p class="mb-0">Belum ada laporan Pelaporan yang masuk ke sistem.</p>
                                                 </td>
                                             </tr>
                                         <?php endif; ?>
@@ -380,7 +380,7 @@ function getStatusBadge($status) {
             <div class="row justify-content-center">
                 <div class="col-md-8 text-center">
                     <h5>Pemerintah Kabupaten Bombana</h5>
-                    <p>Pusat Layanan Aspirasi dan Pengaduan Terpadu</p>
+                    <p>Pusat Layanan Aspirasi dan Pelaporan Terpadu</p>
                     <hr>
                     <p>&copy; <?php echo date("Y"); ?> <strong class="text-gold">Pemkab Bombana</strong>. Semua Hak Dilindungi Undang-Undang.</p>
                 </div>

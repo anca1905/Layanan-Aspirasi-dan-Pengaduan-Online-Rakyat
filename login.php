@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="card login-card">
                     <div class="login-header">
                         <img src="assets/img/logo_bombana.png" alt="Logo Bombana">
-                        <h5 class="fw-bold mb-0" style="color: var(--primary-color);">SISTEM PENGADUAN</h5>
+                        <h5 class="fw-bold mb-0" style="color: var(--primary-color);">SISTEM Pelaporan</h5>
                         <p class="text-muted small">Pemerintah Kabupaten Bombana</p>
                     </div>
 

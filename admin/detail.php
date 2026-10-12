@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
                     $mail->Port       = 587;
                     
-                    $mail->setFrom('noreply@bombanakab.go.id', 'Sistem Pengaduan Bombana');
+                    $mail->setFrom('noreply@bombanakab.go.id', 'Sistem Pelaporan Bombana');
                     $mail->addAddress($reporter['email']);
                     
                     $mail->isHTML(true);

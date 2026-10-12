@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port       = 587;
                 
-                $mail->setFrom('noreply@bombanakab.go.id', 'Sistem Pengaduan Bombana');
+                $mail->setFrom('noreply@bombanakab.go.id', 'Sistem Pelaporan Bombana');
                 $mail->addAddress($email);
                 
                 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $mail->Subject = 'Verifikasi Email Akun Anda';
                 $mail->Body    = "
                     <h3>Halo {$name},</h3>
-                    <p>Terima kasih telah mendaftar di Sistem Pengaduan Jalan Kabupaten Bombana.</p>
+                    <p>Terima kasih telah mendaftar di Sistem Pelaporan Jalan Kabupaten Bombana.</p>
                     <p>Silakan klik link di bawah ini untuk memverifikasi alamat email Anda dan mengaktifkan akun:</p>
                     <p><a href='{$verify_link}' style='padding: 10px 15px; background-color: #8B0000; color: white; text-decoration: none; border-radius: 5px;'>Verifikasi Email</a></p>
                 ";
@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="login-header">
                         <img src="assets/img/logo_bombana.png" alt="Logo">
                         <h5 class="fw-bold mb-0" style="color: #8B0000;">REGISTRASI AKUN</h5>
-                        <p class="text-muted small">Sistem Pengaduan Jalan Kabupaten Bombana</p>
+                        <p class="text-muted small">Sistem Pelaporan Jalan Kabupaten Bombana</p>
                     </div>
                     <div class="card-body p-4 bg-white">
                         <?php if ($error): ?> <div class="alert alert-danger py-2 small"><i class="fas fa-exclamation-circle me-1"></i> <?php echo $error; ?></div> <?php endif; ?>

@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!isPointInBombanaPHP($lat, $lng)) {
         $message = "<div class='alert alert-danger border-start border-5 border-danger'>
                         <h5 class='alert-heading fw-bold'><i class='fas fa-ban me-2'></i>Lokasi Ditolak!</h5>
-                        <p class='mb-0'>Koordinat yang Anda masukkan berada di luar batas resmi wilayah Kabupaten Bombana (terdeteksi Kolaka/Kabupaten tetangga). Sistem hanya menerima pengaduan untuk wilayah Kabupaten Bombana.</p>
+                        <p class='mb-0'>Koordinat yang Anda masukkan berada di luar batas resmi wilayah Kabupaten Bombana (terdeteksi Kolaka/Kabupaten tetangga). Sistem hanya menerima Pelaporan untuk wilayah Kabupaten Bombana.</p>
                     </div>";
         goto end_post;
     }
@@ -135,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $mail->Password   = 'kxzq hgzn fewa nruj'; 
                 $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port       = 587;
-                $mail->setFrom('noreply@bombanakab.go.id', 'Sistem Pengaduan Bombana');
+                $mail->setFrom('noreply@bombanakab.go.id', 'Sistem Pelaporan Bombana');
                 $mail->addAddress($admin_email);
                 $mail->isHTML(true);
                 $mail->Subject = 'Laporan Jalan Rusak Baru - ' . $tracking_code;

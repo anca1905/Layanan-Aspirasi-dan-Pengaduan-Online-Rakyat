@@ -41,15 +41,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $mail->Port       = 587;
 
                 // Pengirim & Penerima
-                $mail->setFrom('noreply@bombanakab.go.id', 'Sistem Pengaduan Bombana');
+                $mail->setFrom('noreply@bombanakab.go.id', 'Sistem Pelaporan Bombana');
                 $mail->addAddress($email);
 
                 // Konten Email
                 $mail->isHTML(true);
-                $mail->Subject = 'Reset Password - Sistem Pengaduan Bombana';
+                $mail->Subject = 'Reset Password - Sistem Pelaporan Bombana';
                 $mail->Body    = "
                     <h3>Halo,</h3>
-                    <p>Kami menerima permintaan untuk mereset password akun Anda di Sistem Pengaduan Jalan Kabupaten Bombana.</p>
+                    <p>Kami menerima permintaan untuk mereset password akun Anda di Sistem Pelaporan Jalan Kabupaten Bombana.</p>
                     <p>Silakan klik link di bawah ini untuk mengatur ulang password Anda:</p>
                     <p><a href='{$reset_link}' style='padding: 10px 15px; background-color: #8B0000; color: white; text-decoration: none; border-radius: 5px;'>Reset Password Sekarang</a></p>
                     <p>Link ini akan kadaluarsa dalam 1 jam.</p>
@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="login-header">
                         <img src="assets/img/logo_bombana.png" alt="Logo">
                         <h5 class="fw-bold mb-0" style="color: #8B0000;">LUPA PASSWORD</h5>
-                        <p class="text-muted small">Sistem Pengaduan Jalan Kabupaten Bombana</p>
+                        <p class="text-muted small">Sistem Pelaporan Jalan Kabupaten Bombana</p>
                     </div>
                     <div class="card-body p-4 bg-white">
                         <?php if ($error): ?> <div class="alert alert-danger py-2 small"><i class="fas fa-exclamation-circle me-1"></i> <?php echo $error; ?></div> <?php endif; ?>

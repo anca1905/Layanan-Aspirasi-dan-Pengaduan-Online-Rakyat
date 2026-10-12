@@ -251,7 +251,7 @@ if (!empty($_GET['tahun'])) $filter_label .= ' | Tahun: ' . htmlspecialchars($_G
         <tbody>
             <?php if (empty($reports)): ?>
                 <tr>
-                    <td colspan="7" class="center">Tidak ada data pengaduan yang sesuai filter.</td>
+                    <td colspan="7" class="center">Tidak ada data Pelaporan yang sesuai filter.</td>
                 </tr>
             <?php else: ?>
                 <?php $no = 1; foreach ($reports as $row): ?>
